@@ -1,0 +1,35 @@
+GET http://localhost:8080/api/v1/users
+
+###
+GET http://localhost:8080/api/v2/users
+
+###
+
+GET http://localhost:8080/api/v1/users/2000
+
+###
+GET http://localhost:8080/api/v2/users/2000
+
+###
+
+POST http://localhost:8080/api/v1/users
+
+###
+POST http://localhost:8080/api/v2/users
+
+###
+
+PUT http://localhost:8080/api/v1/users/1
+
+### 
+PUT http://localhost:8080/api/v2/users/1
+
+###
+
+DELETE http://localhost:8080/api/v1/users/1
+
+###
+
+DELETE http://localhost:8080/api/v2/users/1
+
+
