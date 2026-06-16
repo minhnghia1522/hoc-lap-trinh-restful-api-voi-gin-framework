@@ -1,0 +1,36 @@
+### Users - V1
+
+### List users
+GET http://localhost:8080/api/v1/users
+
+### Get user by id
+GET http://localhost:8080/api/v1/users/negative
+
+### Get user by uuid
+GET http://localhost:8080/api/v1/users/admin/b2efd1d5-3d81-4dff-849c-3659a07e0ad5
+
+### Create user
+POST http://localhost:8080/api/v1/users
+
+### Update user
+PUT http://localhost:8080/api/v1/users/1
+
+### Delete user
+DELETE http://localhost:8080/api/v1/users/1
+
+### Users - V2
+
+### List users
+GET http://localhost:8080/api/v2/users
+
+### Get user by id
+GET http://localhost:8080/api/v2/users/2000
+
+### Create user
+POST http://localhost:8080/api/v2/users
+
+### Update user
+PUT http://localhost:8080/api/v2/users/1
+
+### Delete user
+DELETE http://localhost:8080/api/v2/users/1
