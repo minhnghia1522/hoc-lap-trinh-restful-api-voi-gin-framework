@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"nghiadev.con/hoc-golang/utils"
 )
 
 type ProductHandler struct {
@@ -21,9 +22,9 @@ var searchRegex = regexp.MustCompile(`^[a-zA-Z0-9\s]+$`)
 func (*ProductHandler) GetProductsV1(ctx *gin.Context) {
 	search := ctx.Query("search")
 
-	if search == "" {
+	if err := utils.ValidationRequired("Search", search); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Search is required",
+			"error": err.Error(),
 		})
 		return
 	}

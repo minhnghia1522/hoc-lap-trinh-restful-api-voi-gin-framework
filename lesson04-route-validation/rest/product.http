@@ -1,7 +1,7 @@
 ### Products - V1
 
 ### List products
-GET http://localhost:8080/api/v1/products?search=khoa hoc go lang 2c&limit=-1
+GET http://localhost:8080/api/v1/products?search=khoa hoc go lang 2c
 
 ### Get product by id
 GET http://localhost:8080/api/v1/products/2000
