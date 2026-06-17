@@ -4,7 +4,7 @@
 GET http://localhost:8080/api/v1/users
 
 ### Get user by id
-GET http://localhost:8080/api/v1/users/negative
+GET http://localhost:8080/api/v1/users/-1
 
 ### Get user by uuid
 GET http://localhost:8080/api/v1/users/admin/b2efd1d5-3d81-4dff-849c-3659a07e0ad5

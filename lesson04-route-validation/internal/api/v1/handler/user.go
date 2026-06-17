@@ -2,13 +2,20 @@ package v1handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"nghiadev.con/hoc-golang/utils"
 )
 
 type UserHandler struct {
+}
+
+type GetUserByIdV1Param struct {
+	ID int `uri:"id" binding:"gt=0"`
+}
+
+type GetUserByUuIdV1Param struct {
+	Uuid string `uri:"uuid" binding:"uuid"`
 }
 
 func NewUserHandler() *UserHandler {
@@ -27,45 +34,47 @@ func (u *UserHandler) GetUsersV1(ctx *gin.Context) {
 }
 
 func (u *UserHandler) GetUserByIdV1(ctx *gin.Context) {
-	userIdStr := ctx.Param("id")
-	userId, err := strconv.Atoi(userIdStr)
+	var params GetUserByIdV1Param
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.HandleValidationErrors(err))
+		return
+	}
 
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "ID must be a number",
-		})
-		return
-	}
-	if userId <= 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "ID must be a positive",
-		})
-		return
-	}
+	// userIdStr := ctx.Param("id")
+	// userId, err := strconv.Atoi(userIdStr)
+
+	// if err != nil {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{
+	// 		"error": "ID must be a number",
+	// 	})
+	// 	return
+	// }
+	// if userId <= 0 {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{
+	// 		"error": "ID must be a positive",
+	// 	})
+	// 	return
+	// }
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Get user by ID (V1)",
 		"data": gin.H{
-			"user_id": userId,
+			"user_id": params.ID,
 		},
 	})
 }
 
 func (u *UserHandler) GetUserByUuIdV1(ctx *gin.Context) {
-	uuidStr := ctx.Param("uuid")
-	_, err := uuid.Parse(uuidStr)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "ID must be a valid UUID",
-		})
+	var params GetUserByUuIdV1Param
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.HandleValidationErrors(err))
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Get user by UUID (V1)",
 		"data": gin.H{
-			"user_id": uuidStr,
+			"user_id": params.Uuid,
 		},
 	})
 }
