@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -26,8 +27,16 @@ func HandleValidationErrors(err error) gin.H {
 			log.Printf("%+v", e.Field())
 
 			switch e.Tag() {
+			case "required":
+				errorMap[e.Field()] = e.Field() + " is required"
 			case "gt":
-				errorMap[e.Field()] = e.Field() + " must be a positive number"
+				errorMap[e.Field()] = fmt.Sprintf("%s must be greater than %s", e.Field(), e.Param())
+			case "lt":
+				errorMap[e.Field()] = fmt.Sprintf("%s must be less than %s", e.Field(), e.Param())
+			case "gte":
+				errorMap[e.Field()] = fmt.Sprintf("%s must be greater than or equal to %s", e.Field(), e.Param())
+			case "lte":
+				errorMap[e.Field()] = fmt.Sprintf("%s must be less than or equal to %s", e.Field(), e.Param())
 			case "uuid":
 				errorMap[e.Field()] = e.Field() + " must be a valid UUID"
 			case "slug":
@@ -36,8 +45,13 @@ func HandleValidationErrors(err error) gin.H {
 				errorMap[e.Field()] = fmt.Sprintf("%s must be greater than %s characters.", e.Field(), e.Param())
 			case "max":
 				errorMap[e.Field()] = fmt.Sprintf("%s must be less than %s characters.", e.Field(), e.Param())
-			}
+			case "oneof":
+				allowedValues := strings.Join(strings.Split(e.Param(), " "), ", ")
+				errorMap[e.Field()] = fmt.Sprintf("%s must be one of %s.", e.Field(), allowedValues)
+			case "search":
+				errorMap[e.Field()] = e.Field() + " must contain only lowercase letter, numbers, hyphens and dots."
 
+			}
 		}
 		return gin.H{"error": errorMap}
 	}
@@ -57,5 +71,11 @@ func RegisterValidators() error {
 	v.RegisterValidation("slug", func(fl validator.FieldLevel) bool {
 		return slugRegex.MatchString(fl.Field().String())
 	})
+
+	var searchRegex = regexp.MustCompile(`^[a-zA-Z0-9\s]+$`)
+	v.RegisterValidation("search", func(fl validator.FieldLevel) bool {
+		return searchRegex.MatchString(fl.Field().String())
+	})
+
 	return nil
 }

@@ -4,28 +4,24 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"nghiadev.con/hoc-golang/utils"
 )
 
 type CategoryHandler struct {
+}
+
+type GetCategoriesV1Param struct {
+	Category string `uri:"category" binding:"oneof=java golang node"`
 }
 
 func NewCategoryHandler() *CategoryHandler {
 	return &CategoryHandler{}
 }
 
-var validCategory = map[string]bool{
-	"java":   true,
-	"golang": true,
-	"node":   true,
-}
-
 func (c *CategoryHandler) GetCategoriesV1(ctx *gin.Context) {
-	category := ctx.Param("category")
-
-	if !validCategory[category] {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Category must be one of: java, golang, node, python",
-		})
+	var params GetCategoriesV1Param
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.HandleValidationErrors(err))
 		return
 	}
 

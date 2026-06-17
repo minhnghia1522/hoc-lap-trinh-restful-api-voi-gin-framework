@@ -2,7 +2,6 @@ package v1handler
 
 import (
 	"net/http"
-	"regexp"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -16,36 +15,43 @@ type GetProductBySlugV1Param struct {
 	Slug string `uri:"slug" binding:"slug,min=3,max=100"`
 }
 
+type GetProductsV1Param struct {
+	Search string `form:"search" binding:"required,min=1,max=300,search"`
+}
+
 func NewProductHandler() *ProductHandler {
 	return &ProductHandler{}
 }
 
-var slugRegex = regexp.MustCompile(`^[a-z0-9]+(?:[-.][a-z0-9]+)*$`)
-var searchRegex = regexp.MustCompile(`^[a-zA-Z0-9\s]+$`)
-
 func (*ProductHandler) GetProductsV1(ctx *gin.Context) {
-	search := ctx.Query("search")
-
-	if err := utils.ValidationRequired("Search", search); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+	var params GetProductsV1Param
+	if err := ctx.ShouldBindQuery(&params); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.HandleValidationErrors(err))
 		return
 	}
 
-	if len(search) < 3 || len(search) > 50 {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Search must be between 3 and 50 characters",
-		})
-		return
-	}
+	// search := ctx.Query("search")
 
-	if !searchRegex.MatchString(search) {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Search must contain only letters, number and spaces",
-		})
-		return
-	}
+	// if err := utils.ValidationRequired("Search", search); err != nil {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{
+	// 		"error": err.Error(),
+	// 	})
+	// 	return
+	// }
+
+	// if len(search) < 3 || len(search) > 50 {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{
+	// 		"error": "Search must be between 3 and 50 characters",
+	// 	})
+	// 	return
+	// }
+
+	// if !searchRegex.MatchString(search) {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{
+	// 		"error": "Search must contain only letters, number and spaces",
+	// 	})
+	// 	return
+	// }
 
 	limitStr := ctx.DefaultQuery("limit", "10")
 
@@ -60,7 +66,7 @@ func (*ProductHandler) GetProductsV1(ctx *gin.Context) {
 		"message": "List all products (V1)",
 		"meta": gin.H{
 			"limit":      limit,
-			"key-search": search,
+			"key-search": params.Search,
 		},
 		"data": []string{
 			"product 1",

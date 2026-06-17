@@ -40,22 +40,6 @@ func (u *UserHandler) GetUserByIdV1(ctx *gin.Context) {
 		return
 	}
 
-	// userIdStr := ctx.Param("id")
-	// userId, err := strconv.Atoi(userIdStr)
-
-	// if err != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{
-	// 		"error": "ID must be a number",
-	// 	})
-	// 	return
-	// }
-	// if userId <= 0 {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{
-	// 		"error": "ID must be a positive",
-	// 	})
-	// 	return
-	// }
-
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Get user by ID (V1)",
 		"data": gin.H{

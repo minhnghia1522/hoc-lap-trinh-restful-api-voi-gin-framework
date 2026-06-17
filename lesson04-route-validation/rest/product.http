@@ -1,13 +1,13 @@
 ### Products - V1
 
 ### List products
-GET http://localhost:8080/api/v1/products?search=khoa hoc go lang 2c
+GET http://localhost:8080/api/v1/products?search=khoa%hoc go lang 2c
 
 ### Get product by id
 GET http://localhost:8080/api/v1/products/2000
 
 ### Get product by slug
-GET http://localhost:8080/api/v1/products/khoa-hoc-lap-trinh.html
+GET http://localhost:8080/api/v1/products/@khoa#hoc-lap-trinh.html
 
 ### Create product
 POST http://localhost:8080/api/v1/products
