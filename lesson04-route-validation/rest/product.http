@@ -14,15 +14,31 @@ POST http://localhost:8080/api/v1/products
 content-type: application/json
 
 {
-    "name": "sample",
-    "price": 10000,
-    "display": false,
-    "product_image": {
-        "image_name": "Test",
-        "image_link": "https://chat2like.com/images/image.png"
+  "name": "sample",
+  "price": 10000,
+  "display": false,
+  "product_image": {
+    "image_name": "Test",
+    "image_link": "https://chat2like.com/images/image.png"
+  },
+  "tags": ["Le", "Minh", "Nghia"],
+  "product_attribute": [
+    { "attribute_name": "Ao", "attribute_value": "123" },
+    { "attribute_name": "Ao", "attribute_value": "M" }
+  ],
+  "product_info": {
+    "b2efd1d5-3d81-4dff-849c-3659a07e0ad5": {
+      "info_key": "sell",
+      "info_value": "discount"
     },
-    "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+    "9f3b7bcb-5cbc-45f3-9c2e-bad3442f3a22": {
+      "info_key": "unique",
+      "info_value": "unique"
+    }
+  },
+  "time": "Wed, 21 Oct 2015 18:27:50 GMT"
 }
+
 
 
 ### Update product

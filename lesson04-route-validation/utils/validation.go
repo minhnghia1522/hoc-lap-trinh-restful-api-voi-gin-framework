@@ -24,11 +24,26 @@ func HandleValidationErrors(err error) gin.H {
 		errorMap := make(map[string]string)
 
 		for _, e := range validationError {
-			fieldPath := e.Field()
+			root := strings.Split(e.Namespace(), ".")[0]
+
+			rawPath := strings.TrimPrefix(e.Namespace(), root+".")
+
+			parts := strings.Split(rawPath, ".")
+			for i, part := range parts {
+				if strings.Contains(part, "[") {
+					idx := strings.Index(part, "[")
+					base := camelToSnake(part[:idx])
+					index := part[idx:]
+					parts[i] = base + index
+				} else {
+					parts[i] = camelToSnake(part)
+				}
+			}
+			fieldPath := strings.Join(parts, ".")
 			param := e.Param()
 			switch e.Tag() {
 			case "required":
-				errorMap[fieldPath] = fieldPath + " is required"
+				errorMap[fieldPath] = fmt.Sprintf("%s is required", fieldPath)
 			case "gt":
 				errorMap[fieldPath] = fmt.Sprintf("%s must be greater than %s", fieldPath, param)
 			case "lt":
@@ -38,9 +53,9 @@ func HandleValidationErrors(err error) gin.H {
 			case "lte":
 				errorMap[fieldPath] = fmt.Sprintf("%s must be less than or equal to %s", fieldPath, param)
 			case "uuid":
-				errorMap[fieldPath] = fieldPath + " must be a valid UUID"
+				errorMap[fieldPath] = fmt.Sprintf("%s must be a valid UUID", fieldPath)
 			case "slug":
-				errorMap[fieldPath] = fieldPath + " must contain only lowercase letter, numbers, hyphens and dots."
+				errorMap[fieldPath] = fmt.Sprintf("%s must contain only lowercase letter, numbers, hyphens and dots.", fieldPath)
 			case "min":
 				errorMap[fieldPath] = fmt.Sprintf("%s must be greater than %s characters.", fieldPath, param)
 			case "max":
@@ -53,7 +68,7 @@ func HandleValidationErrors(err error) gin.H {
 				allowedValues := strings.Join(strings.Split(param, " "), ", ")
 				errorMap[fieldPath] = fmt.Sprintf("%s must be one of %s.", fieldPath, allowedValues)
 			case "search":
-				errorMap[fieldPath] = fieldPath + " must contain only lowercase letter, numbers, hyphens and dots."
+				errorMap[fieldPath] = fmt.Sprintf("%s must contain only lowercase letter, numbers, hyphens and dots.", fieldPath)
 			case "email":
 				errorMap[fieldPath] = fmt.Sprintf("%s must be in the correct email format", fieldPath)
 			case "datetime":
@@ -128,4 +143,15 @@ func RegisterValidators() error {
 	})
 
 	return nil
+}
+
+var (
+	matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+	matchAllCap   = regexp.MustCompile("([a-z0-9])([A-Z])")
+)
+
+func camelToSnake(s string) string {
+	snake := matchFirstCap.ReplaceAllString(s, "${1}_${2}")
+	snake = matchAllCap.ReplaceAllString(s, "${1}_${2}")
+	return strings.ToLower(snake)
 }

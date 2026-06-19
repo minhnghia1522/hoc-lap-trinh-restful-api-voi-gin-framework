@@ -60,5 +60,5 @@ func main() {
 		product.PUT("/:id", productHandlerV2.PutProductsV2)
 		product.DELETE("/:id", productHandlerV2.DeleteProductsV2)
 	}
-	r.Run(":8080")
+	r.Run("127.0.0.1:8080")
 }

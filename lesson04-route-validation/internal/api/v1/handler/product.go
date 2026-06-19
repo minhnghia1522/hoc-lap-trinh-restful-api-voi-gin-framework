@@ -1,10 +1,12 @@
 package v1handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"nghiadev.con/hoc-golang/utils"
 )
 
@@ -19,16 +21,30 @@ type GetProductsV1Param struct {
 	Search string `form:"search" binding:"required,min=1,max=300,search"`
 }
 
-type PostProductsV1Param struct {
-	Name         string       `json:"name" binding:"required,min=3,max=100"`
-	Price        int          `json:"price" binding:"required,min_int=10000"`
-	Display      *bool        `json:"display" binding:"omitempty"`
-	ProductImage ProductImage `json:"product_image" binding:"required"`
+type ProductAttribute struct {
+	AttributeName  string `json:"attribute_name" binding:"required"`
+	AttributeValue string `json:"attribute_value" binding:"required"`
 }
 
 type ProductImage struct {
 	ImageName string `json:"image_name" binding:"required"`
 	ImageLink string `json:"image_link" binding:"required,file_ext=jpg png gif"`
+}
+
+type ProductInfo struct {
+	InfoKey   string `json:"info_key" binding:"required"`
+	InfoValue string `json:"info_value" binding:"required"`
+}
+
+type PostProductsV1Param struct {
+	Name             string                 `json:"name" binding:"required,min=3,max=100"`
+	Price            int                    `json:"price" binding:"required,min_int=10000"`
+	Display          *bool                  `json:"display" binding:"omitempty"`
+	ProductImage     ProductImage           `json:"product_image" binding:"required"`
+	Tags             []string               `json:"tags" binding:"required,gt=2"`
+	ProductAttribute []ProductAttribute     `json:"product_attribute" binding:"required,gt=0,dive"`
+	ProductInfo      map[string]ProductInfo `json:"product_info" binding:"required,gt=0,dive"`
+	ProductMetaData  map[string]any         `json:"product_meta" binding:"omitempty"`
 }
 
 func NewProductHandler() *ProductHandler {
@@ -97,6 +113,17 @@ func (*ProductHandler) PostProductsV1(ctx *gin.Context) {
 		return
 	}
 
+	for key := range params.ProductInfo {
+		if _, err := uuid.Parse(key); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"errors": gin.H{
+					"product_info": fmt.Sprintf("Key '%s' in product_info is not a valid UUID", key),
+				},
+			})
+			return
+		}
+	}
+
 	if params.Display == nil {
 		defaultDisplay := true
 		params.Display = &defaultDisplay
@@ -109,6 +136,10 @@ func (*ProductHandler) PostProductsV1(ctx *gin.Context) {
 			"price":         params.Price,
 			"display":       params.Display,
 			"product_image": params.ProductImage,
+			"tags":          params.Tags,
+			"attribute":     params.ProductAttribute,
+			"info":          params.ProductInfo,
+			"meta":          params.ProductMetaData,
 		},
 	})
 }
