@@ -11,6 +11,19 @@ GET http://localhost:8080/api/v1/products/@khoa#hoc-lap-trinh.html
 
 ### Create product
 POST http://localhost:8080/api/v1/products
+content-type: application/json
+
+{
+    "name": "sample",
+    "price": 1000,
+    "display": true,
+    "product_image": {
+        "image_name": "Test",
+        "image_link": "https://chat2like.com/images/image.png"
+    },
+    "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+}
+
 
 ### Update product
 PUT http://localhost:8080/api/v1/products/1
