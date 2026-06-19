@@ -37,7 +37,8 @@ func main() {
 
 		category := v1.Group("categories")
 		categoryHandler := v1handler.NewCategoryHandler()
-		category.POST("/:category", categoryHandler.GetCategoriesV1)
+		category.GET("/:category", categoryHandler.GetCategoriesV1)
+		category.POST("/", categoryHandler.PostCategoriesV1)
 	}
 
 	v2 := r.Group("/api/v2")
