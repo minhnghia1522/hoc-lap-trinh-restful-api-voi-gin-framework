@@ -21,14 +21,14 @@ type GetProductsV1Param struct {
 
 type PostProductsV1Param struct {
 	Name         string       `json:"name" binding:"required,min=3,max=100"`
-	Price        int          `json:"price" binding:"required,min=100"`
-	Display      bool         `json:"display" binding:"omitempty"`
+	Price        int          `json:"price" binding:"required,min_int=10000"`
+	Display      *bool        `json:"display" binding:"omitempty"`
 	ProductImage ProductImage `json:"product_image" binding:"required"`
 }
 
 type ProductImage struct {
 	ImageName string `json:"image_name" binding:"required"`
-	ImageLink string `json:"image_link" binding:"required"`
+	ImageLink string `json:"image_link" binding:"required,file_ext=jpg png gif"`
 }
 
 func NewProductHandler() *ProductHandler {
@@ -97,7 +97,11 @@ func (*ProductHandler) PostProductsV1(ctx *gin.Context) {
 		return
 	}
 
-	// productId := ctx.Request.Body("")
+	if params.Display == nil {
+		defaultDisplay := true
+		params.Display = &defaultDisplay
+	}
+
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "Created product successful (V1)",
 		"data": gin.H{

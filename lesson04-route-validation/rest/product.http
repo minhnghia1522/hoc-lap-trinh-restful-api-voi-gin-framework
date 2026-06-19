@@ -15,8 +15,8 @@ content-type: application/json
 
 {
     "name": "sample",
-    "price": 1000,
-    "display": true,
+    "price": 10000,
+    "display": false,
     "product_image": {
         "image_name": "Test",
         "image_link": "https://chat2like.com/images/image.png"

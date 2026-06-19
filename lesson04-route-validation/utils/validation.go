@@ -60,7 +60,7 @@ func HandleValidationErrors(err error) gin.H {
 				errorMap[fieldPath] = fmt.Sprintf("%s must follow the YYYY-MM-DD format exactly", fieldPath)
 			case "file_ext":
 				allowedValues := strings.Join(strings.Split(param, " "), ",")
-				errorMap[fieldPath] = fmt.Sprintf("%s chỉ cho phép những file có extension: %s", fieldPath, allowedValues)
+				errorMap[fieldPath] = fmt.Sprintf("%s only allow files with extensions: %s", fieldPath, allowedValues)
 			}
 		}
 		return gin.H{"error": errorMap}
