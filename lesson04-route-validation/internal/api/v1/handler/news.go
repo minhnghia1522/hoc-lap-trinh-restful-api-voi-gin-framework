@@ -133,11 +133,11 @@ func (n *NewsHandler) PostUploadMultipleFileNewsV1(ctx *gin.Context) {
 	}
 
 	var successFiles []string
-	var filedFile []map[string]string
+	var failedFile []map[string]string
 	for _, image := range images {
 		filename, err := utils.ValidateAndSaveFile(image, "./uploads")
 		if err != nil {
-			filedFile = append(filedFile, map[string]string{
+			failedFile = append(failedFile, map[string]string{
 				"filename": image.Filename,
 				"error":    err.Error(),
 			})
@@ -156,9 +156,9 @@ func (n *NewsHandler) PostUploadMultipleFileNewsV1(ctx *gin.Context) {
 		"success_files": successFiles,
 	}
 
-	if len(filedFile) > 0 {
-		resp["message"] = "Upload completed with partial erros"
-		resp["error_files"] = filedFile
+	if len(failedFile) > 0 {
+		resp["message"] = "Upload completed with partial errors"
+		resp["error_files"] = failedFile
 	}
 
 	ctx.JSON(http.StatusOK, resp)

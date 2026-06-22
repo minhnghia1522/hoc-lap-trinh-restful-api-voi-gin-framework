@@ -50,7 +50,8 @@ func main() {
 			newsHandler := v1handler.NewNewsHandler()
 			news.GET("/:slug", newsHandler.GetNewsV1)
 			news.POST("/", newsHandler.PostNewsV1)
-			news.POST("/uploadFile", newsHandler.PostUploadFileNewsV1)
+			news.POST("/upload-file", newsHandler.PostUploadFileNewsV1)
+			news.POST("/upload-multiple-file", newsHandler.PostUploadMultipleFileNewsV1)
 		}
 	}
 
