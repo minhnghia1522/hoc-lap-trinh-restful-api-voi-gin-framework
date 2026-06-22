@@ -4,15 +4,19 @@ import (
 	"github.com/gin-gonic/gin"
 	v1handler "nghiadev.con/hoc-golang/internal/api/v1/handler"
 	v2handler "nghiadev.con/hoc-golang/internal/api/v2/handler"
+	"nghiadev.con/hoc-golang/middleware"
 	"nghiadev.con/hoc-golang/utils"
 )
 
 func main() {
-	r := gin.Default()
 
 	if err := utils.RegisterValidators(); err != nil {
 		panic(err)
 	}
+
+	r := gin.Default()
+
+	r.Use(middleware.SampleMiddleware())
 
 	v1 := r.Group("/api/v1")
 	{
