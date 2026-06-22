@@ -1,0 +1,9 @@
+### News - V1
+
+### Create news with image upload
+POST http://localhost:8080/api/v1/news
+Content-Type: multipart/form-data
+
+title=Khoa hoc lap trinh golang
+status=1
+image=@C:\Users\minh-nghia\Pictures\capabilities-of-generative-ai-081024.png

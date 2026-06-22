@@ -27,18 +27,31 @@ func main() {
 			user.DELETE("/:id", userHandlerV1.DeleteUsersV1)
 
 		}
+
 		product := v1.Group("products")
-		productHandlerV1 := v1handler.NewProductHandler()
-		product.GET("/", productHandlerV1.GetProductsV1)
-		product.GET("/:slug", productHandlerV1.GetProductBySlugV1)
-		product.POST("/", productHandlerV1.PostProductsV1)
-		product.PUT("/:id", productHandlerV1.PutProductsV1)
-		product.DELETE("/:id", productHandlerV1.DeleteProductsV1)
+		{
+			productHandlerV1 := v1handler.NewProductHandler()
+			product.GET("/", productHandlerV1.GetProductsV1)
+			product.GET("/:slug", productHandlerV1.GetProductBySlugV1)
+			product.POST("/", productHandlerV1.PostProductsV1)
+			product.PUT("/:id", productHandlerV1.PutProductsV1)
+			product.DELETE("/:id", productHandlerV1.DeleteProductsV1)
+		}
 
 		category := v1.Group("categories")
-		categoryHandler := v1handler.NewCategoryHandler()
-		category.GET("/:category", categoryHandler.GetCategoriesV1)
-		category.POST("/", categoryHandler.PostCategoriesV1)
+		{
+			categoryHandler := v1handler.NewCategoryHandler()
+			category.GET("/:category", categoryHandler.GetCategoriesV1)
+			category.POST("/", categoryHandler.PostCategoriesV1)
+		}
+
+		news := v1.Group("news")
+		{
+			newsHandler := v1handler.NewNewsHandler()
+			news.GET("/:slug", newsHandler.GetNewsV1)
+			news.POST("/", newsHandler.PostNewsV1)
+			news.POST("/uploadFile", newsHandler.PostUploadFileNewsV1)
+		}
 	}
 
 	v2 := r.Group("/api/v2")
@@ -54,12 +67,14 @@ func main() {
 		}
 
 		product := v2.Group("products")
-		productHandlerV2 := v2handler.NewProductHandler()
-		product.GET("/", productHandlerV2.GetProductsV2)
-		product.GET("/:id", productHandlerV2.GetProductByIdV2)
-		product.POST("/", productHandlerV2.PostProductsV2)
-		product.PUT("/:id", productHandlerV2.PutProductsV2)
-		product.DELETE("/:id", productHandlerV2.DeleteProductsV2)
+		{
+			productHandlerV2 := v2handler.NewProductHandler()
+			product.GET("/", productHandlerV2.GetProductsV2)
+			product.GET("/:id", productHandlerV2.GetProductByIdV2)
+			product.POST("/", productHandlerV2.PostProductsV2)
+			product.PUT("/:id", productHandlerV2.PutProductsV2)
+			product.DELETE("/:id", productHandlerV2.DeleteProductsV2)
+		}
 	}
 	r.Run("127.0.0.1:8080")
 }
