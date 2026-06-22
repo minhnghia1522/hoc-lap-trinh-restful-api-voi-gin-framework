@@ -77,5 +77,7 @@ func main() {
 			product.DELETE("/:id", productHandlerV2.DeleteProductsV2)
 		}
 	}
+
+	r.StaticFS("/images", gin.Dir("./uploads", false))
 	r.Run("127.0.0.1:8080")
 }
