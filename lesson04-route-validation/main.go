@@ -1,9 +1,14 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+
 	v1handler "nghiadev.con/hoc-golang/internal/api/v1/handler"
 	v2handler "nghiadev.con/hoc-golang/internal/api/v2/handler"
+
 	"nghiadev.con/hoc-golang/middleware"
 	"nghiadev.con/hoc-golang/utils"
 )
@@ -14,9 +19,14 @@ func main() {
 		panic(err)
 	}
 
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
+		panic(err)
+	}
+
 	r := gin.Default()
 
-	r.Use(middleware.SampleMiddleware())
+	r.Use(middleware.SampleMiddleware(), middleware.APIMiddleware())
 
 	v1 := r.Group("/api/v1")
 	{
