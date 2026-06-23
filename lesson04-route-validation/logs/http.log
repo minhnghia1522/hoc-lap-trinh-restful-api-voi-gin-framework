@@ -1,0 +1,47 @@
+{
+  "level": "info",
+  "method": "GET",
+  "path": "/api/v1/categories/golang",
+  "query": "",
+  "client_ip": "127.0.0.1",
+  "user_agent": "PostmanRuntime/7.51.1",
+  "referer": "",
+  "protocol": "HTTP/1.1",
+  "host": "localhost:8080",
+  "remote_addr": "127.0.0.1:50363",
+  "request_uri": "/api/v1/categories/golang",
+  "content_length": 20,
+  "headers": {
+    "Accept": [
+      "*/*"
+    ],
+    "Accept-Encoding": [
+      "gzip, deflate, br"
+    ],
+    "Cache-Control": [
+      "no-cache"
+    ],
+    "Connection": [
+      "keep-alive"
+    ],
+    "Content-Length": [
+      "20"
+    ],
+    "Content-Type": [
+      "application/x-www-form-urlencoded"
+    ],
+    "Postman-Token": [
+      "98ba3281-a82c-48bf-8084-074faed759f6"
+    ],
+    "User-Agent": [
+      "PostmanRuntime/7.51.1"
+    ],
+    "X-Api-Key": [
+      "5bcd1d01-373f-4ae3-b745-c2c7f11935a2"
+    ]
+  },
+  "status_code": 200,
+  "duration_ms": 0,
+  "time": "2026-06-23T11:27:12+07:00",
+  "message": "HTTP Request Log"
+}
