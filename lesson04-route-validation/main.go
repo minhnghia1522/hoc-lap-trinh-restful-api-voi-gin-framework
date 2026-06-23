@@ -26,7 +26,8 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(middleware.SampleMiddleware(), middleware.APIMiddleware())
+	go middleware.CleanUpClients()
+	r.Use(middleware.SampleMiddleware(), middleware.APIMiddleware(), middleware.RateLimitingMiddleware())
 
 	v1 := r.Group("/api/v1")
 	{
