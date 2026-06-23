@@ -1,16 +1,17 @@
 {
-  "level": "info",
-  "method": "GET",
-  "path": "/api/v1/categories/golang",
+  "level": "warn",
+  "method": "POST",
+  "status_code": 400,
+  "path": "/api/v1/news/upload-multiple-file",
   "query": "",
   "client_ip": "127.0.0.1",
   "user_agent": "PostmanRuntime/7.51.1",
   "referer": "",
   "protocol": "HTTP/1.1",
   "host": "localhost:8080",
-  "remote_addr": "127.0.0.1:50363",
-  "request_uri": "/api/v1/categories/golang",
-  "content_length": 20,
+  "remote_addr": "127.0.0.1:58683",
+  "request_uri": "/api/v1/news/upload-multiple-file",
+  "content_length": 2764679,
   "headers": {
     "Accept": [
       "*/*"
@@ -25,23 +26,37 @@
       "keep-alive"
     ],
     "Content-Length": [
-      "20"
+      "2764679"
     ],
     "Content-Type": [
-      "application/x-www-form-urlencoded"
+      "multipart/form-data; boundary=--------------------------793636661418315711949613"
     ],
     "Postman-Token": [
-      "98ba3281-a82c-48bf-8084-074faed759f6"
+      "2c190448-a948-43d2-adb5-6a67086e49c2"
     ],
     "User-Agent": [
       "PostmanRuntime/7.51.1"
-    ],
-    "X-Api-Key": [
-      "5bcd1d01-373f-4ae3-b745-c2c7f11935a2"
     ]
   },
-  "status_code": 200,
-  "duration_ms": 0,
-  "time": "2026-06-23T11:27:12+07:00",
+  "request_body": {
+    "form_files": [
+      {
+        "content_type": "image/jpeg",
+        "field": "images",
+        "file_name": "aws_vector_database_examples.jpg",
+        "size": "83.39 KB"
+      },
+      {
+        "content_type": "image/png",
+        "field": "images",
+        "file_name": "download.png",
+        "size": "2.55 MB"
+      }
+    ],
+    "status": "1",
+    "title": "Khoa hoc lap trinh golang"
+  },
+  "duration_ms": 8,
+  "time": "2026-06-23T13:52:29+07:00",
   "message": "HTTP Request Log"
 }

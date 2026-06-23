@@ -102,7 +102,7 @@ func (n *NewsHandler) PostUploadFileNewsV1(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
+	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "Post news (V1)",
 		"title":   params.Title,
 		"status":  params.Status,
@@ -161,5 +161,5 @@ func (n *NewsHandler) PostUploadMultipleFileNewsV1(ctx *gin.Context) {
 		resp["error_files"] = failedFile
 	}
 
-	ctx.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusCreated, resp)
 }
