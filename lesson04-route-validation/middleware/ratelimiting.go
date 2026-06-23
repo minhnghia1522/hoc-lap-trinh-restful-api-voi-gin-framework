@@ -63,7 +63,7 @@ func CleanUpClients() {
 	}
 }
 
-// hey -n 20 -c 1 -H X-API-Key 5bcd1d01-373f-4ae3-b745-c2c7f11935a2  http://localhost:8080/api/v1/categories/
+// hey -n 20 -c 1 -H "X-API-Key:5bcd1d01-373f-4ae3-b745-c2c7f11935a2"  http://localhost:8080/api/v1/categories/
 func RateLimitingMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ip := getClientIP(ctx)
