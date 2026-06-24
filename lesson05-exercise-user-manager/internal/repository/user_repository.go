@@ -18,7 +18,8 @@ func NewUserRepository() InMemoryUserRepository {
 	}
 }
 
-func (repo *inMemoryUserRepository) SelectByCondition() {
+func (repo *inMemoryUserRepository) SelectAll() []models.User{
+	return repo.users
 
 }
 

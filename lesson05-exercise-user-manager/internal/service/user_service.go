@@ -20,8 +20,35 @@ func NewUserService(repo repository.InMemoryUserRepository) UserService {
 	}
 }
 
-func (service *userService) Search() {
-	service.repo.SelectByCondition()
+func (service *userService) Search(search string, page, limit int) []models.User {
+	users := service.repo.SelectAll()
+	var filteredUsers []models.User
+
+	if search != "" {
+		search = strings.ToLower(search)
+		for _, user := range users {
+			name := strings.ToLower(user.Name)
+			email := strings.ToLower(user.Email)
+
+			if strings.Contains(name, search) || strings.Contains(email, search) {
+				filteredUsers = append(filteredUsers, user)
+			}
+		}
+	} else {
+		filteredUsers = users
+	}
+
+	start := (page - 1) * limit
+	if start >= len(filteredUsers) {
+		return []models.User{}
+	}
+
+	end := start + limit
+	if end > len(filteredUsers) {
+		end = len(filteredUsers)
+	}
+
+	return filteredUsers[start:end]
 }
 
 func (service *userService) FindUserByUUID(uuid string) (models.User, error) {

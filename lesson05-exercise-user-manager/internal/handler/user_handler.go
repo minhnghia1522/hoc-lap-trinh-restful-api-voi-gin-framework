@@ -18,6 +18,12 @@ type GetUserByUUIDParam struct {
 	Uuid string `uri:"uuid" binding:"uuid"`
 }
 
+type GetUsersParams struct {
+	Search string `form:"search" binding:"omitempty,min=3,max=50,search"`
+	Page   *int   `form:"page" binding:"omitempty,gte=1,lte=100"`
+	Limit  *int   `form:"limit" binding:"omitempty,gte=1,lte=100"`
+}
+
 func NewUserHandler(service service.UserService) *UserHandler {
 	return &UserHandler{
 		service: service,
@@ -25,7 +31,22 @@ func NewUserHandler(service service.UserService) *UserHandler {
 }
 
 func (uh *UserHandler) Search(ctx *gin.Context) {
-	uh.service.Search()
+	var params GetUsersParams
+	if err := ctx.ShouldBindQuery(&params); err != nil {
+		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
+	}
+	page := 1
+	if params.Page != nil {
+		page = *params.Page
+	}
+
+	limit := 10
+	if params.Limit != nil {
+		limit = *params.Limit
+	}
+	modelResultList := uh.service.Search(params.Search, page, limit)
+
+	utils.ResponseSuccess(ctx, http.StatusOK, dto.MapUsersToDTO(modelResultList))
 }
 
 func (uh *UserHandler) GetUserByUUID(ctx *gin.Context) {

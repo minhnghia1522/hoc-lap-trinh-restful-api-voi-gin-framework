@@ -5,7 +5,7 @@ import (
 )
 
 type UserService interface {
-	Search()
+	Search(search string, page, limit int) []models.User
 	FindUserByUUID(uuid string) (models.User, error)
 	CreateUser(userModel models.User) (models.User, error)
 	UpdateUser(uuid string, userModel models.User) (models.User, error)

@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"strings"
 	"user-management-api/internal/models"
 )
 
@@ -33,8 +34,8 @@ type UpdateUserInput struct {
 
 func (input *CreateUserInput) MapCreateInputToModel() models.User {
 	return models.User{
-		Name:     input.Name,
-		Email:    input.Email,
+		Name:     strings.TrimSpace(input.Name),
+		Email:    strings.TrimSpace(input.Email),
 		Age:      input.Age,
 		Password: input.Password,
 		Status:   input.Status,
@@ -44,8 +45,8 @@ func (input *CreateUserInput) MapCreateInputToModel() models.User {
 
 func (input *UpdateUserInput) MapUpdateInputToModel() models.User {
 	return models.User{
-		Name:     input.Name,
-		Email:    input.Email,
+		Name:     strings.TrimSpace(input.Name),
+		Email:    strings.TrimSpace(input.Email),
 		Age:      input.Age,
 		Password: input.Password,
 		Status:   input.Status,
