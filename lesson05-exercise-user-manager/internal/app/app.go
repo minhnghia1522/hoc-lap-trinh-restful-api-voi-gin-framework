@@ -1,10 +1,13 @@
 package app
 
 import (
+	"log"
 	"user-management-api/internal/config"
 	"user-management-api/internal/routes"
+	"user-management-api/internal/validation"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 type Module interface {
@@ -12,11 +15,16 @@ type Module interface {
 }
 
 type Application struct {
-	config *config.Config
-	router *gin.Engine
+	config  *config.Config
+	router  *gin.Engine
+	modules []Module
 }
 
 func NewApplication(cfg *config.Config) *Application {
+	
+	loadEnv()
+	validation.InitValidator()
+	
 	r := gin.Default()
 
 	modules := []Module{
@@ -26,8 +34,9 @@ func NewApplication(cfg *config.Config) *Application {
 	routes.RegisterRoutes(r, getModuleRoutes(modules)...)
 
 	return &Application{
-		config: cfg,
-		router: r,
+		config:  cfg,
+		router:  r,
+		modules: modules,
 	}
 }
 
@@ -41,4 +50,10 @@ func getModuleRoutes(modules []Module) []routes.Route {
 		routeList[i] = module.Routes()
 	}
 	return routeList
+}
+
+func loadEnv() {
+	if err := godotenv.Load("../../.env"); err != nil {
+		log.Printf("No .env file Found")
+	}
 }
