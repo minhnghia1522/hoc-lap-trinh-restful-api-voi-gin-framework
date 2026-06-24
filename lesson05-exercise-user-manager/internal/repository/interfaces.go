@@ -6,7 +6,7 @@ type InMemoryUserRepository interface {
 	SelectByCondition()
 	SelectByUUID(uuid string) (models.User, bool)
 	SelectByEmail(email string) (models.User, bool)
-	CreateUser(user models.User) error
-	UpdateUser(user models.User) error
-	DeleteUser(uuid string) error
+	Insert(user models.User) error
+	Update(user models.User) error
+	Delete(uuid string) error
 }

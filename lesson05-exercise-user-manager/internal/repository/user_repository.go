@@ -40,12 +40,12 @@ func (repo *inMemoryUserRepository) SelectByEmail(email string) (models.User, bo
 	return models.User{}, false
 }
 
-func (repo *inMemoryUserRepository) CreateUser(user models.User) error {
+func (repo *inMemoryUserRepository) Insert(user models.User) error {
 	repo.users = append(repo.users, user)
 	return nil
 }
 
-func (repo *inMemoryUserRepository) UpdateUser(user models.User) error {
+func (repo *inMemoryUserRepository) Update(user models.User) error {
 	for index, model := range repo.users {
 		if model.UUID == user.UUID {
 			repo.users[index] = user
@@ -55,7 +55,7 @@ func (repo *inMemoryUserRepository) UpdateUser(user models.User) error {
 	return fmt.Errorf("User not found")
 }
 
-func (repo *inMemoryUserRepository) DeleteUser(uuid string) error {
+func (repo *inMemoryUserRepository) Delete(uuid string) error {
 	for i, u := range repo.users {
 		if u.UUID == uuid {
 			repo.users = slices.Delete(repo.users, i, i+1)

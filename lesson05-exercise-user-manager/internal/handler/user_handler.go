@@ -40,7 +40,7 @@ func (uh *UserHandler) GetUserByUUID(ctx *gin.Context) {
 		utils.ResponseError(ctx, err)
 		return
 	}
-	utils.ResponseSuccess(ctx, http.StatusOK, model)
+	utils.ResponseSuccess(ctx, http.StatusOK, dto.MapUserToDTO(model))
 }
 
 func (uh *UserHandler) CreateUser(ctx *gin.Context) {
@@ -49,7 +49,7 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
 		return
 	}
-	userCreated, err := uh.service.CreateUser(createUserRequest)
+	userCreated, err := uh.service.CreateUser(createUserRequest.MapCreateInputToModel())
 	if err != nil {
 		utils.ResponseError(ctx, err)
 		return
@@ -58,15 +58,34 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 }
 
 func (uh *UserHandler) UpdateUser(ctx *gin.Context) {
+	var params GetUserByUUIDParam
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
+		return
+	}
+
 	var updateUserRequest dto.UpdateUserInput
 	if err := ctx.ShouldBindBodyWithJSON(&updateUserRequest); err != nil {
 		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
 		return
 	}
-	uh.service.UpdateUser(updateUserRequest)
+	userUpdated, err := uh.service.UpdateUser(params.Uuid, updateUserRequest.MapUpdateInputToModel())
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+	utils.ResponseSuccess(ctx, http.StatusOK, dto.MapUserToDTO(userUpdated))
 }
 
 func (uh *UserHandler) DeleteUser(ctx *gin.Context) {
-	userId := ctx.Param("uuid")
-	uh.service.DeleteUser(userId)
+	var params GetUserByUUIDParam
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
+		return
+	}
+	if err := uh.service.DeleteUser(params.Uuid); err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+	utils.ResponseSuccess(ctx, http.StatusOK, nil)
 }

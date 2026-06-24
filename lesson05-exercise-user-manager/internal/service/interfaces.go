@@ -1,14 +1,13 @@
 package service
 
 import (
-	"user-management-api/internal/dto"
 	"user-management-api/internal/models"
 )
 
 type UserService interface {
 	Search()
 	FindUserByUUID(uuid string) (models.User, error)
-	CreateUser(userRequest dto.CreateUserInput) (models.User, error)
-	UpdateUser(userRequest dto.UpdateUserInput)
-	DeleteUser(uuid string)
+	CreateUser(userModel models.User) (models.User, error)
+	UpdateUser(uuid string, userModel models.User) (models.User, error)
+	DeleteUser(uuid string) error
 }
