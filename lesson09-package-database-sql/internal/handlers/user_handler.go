@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"lesson08-prepare-connection/internal/models"
 	"lesson08-prepare-connection/internal/repository"
 	"net/http"
@@ -27,8 +28,23 @@ func (uh *UserHandler) GetUserById(ctx *gin.Context) {
 		})
 		return
 	}
-	uh.repo.FindById(id)
-	ctx.JSON(http.StatusOK, gin.H{"data": "Get user by id"})
+	user, err := uh.repo.FindById(id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"message": "User not found",
+			})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": "A system error has occurred.",
+			})
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"data": user,
+	})
 }
 
 func (uh *UserHandler) CreateUser(ctx *gin.Context) {
@@ -39,6 +55,14 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 		})
 		return
 	}
-	uh.repo.Create(&user)
-	ctx.JSON(http.StatusOK, gin.H{"data": "Created user"})
+	if err := uh.repo.Create(&user); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Created user",
+		"data":    user,
+	})
 }

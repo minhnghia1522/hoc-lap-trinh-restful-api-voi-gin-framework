@@ -1,6 +1,7 @@
 package main
 
 import (
+	"lesson08-prepare-connection/internal/db"
 	"lesson08-prepare-connection/internal/handlers"
 	"lesson08-prepare-connection/internal/repository"
 	"log"
@@ -15,9 +16,11 @@ func main() {
 		log.Println("No .env file found")
 	}
 
+	dbConnection := db.InitDB()
+
 	r := gin.Default()
 
-	userRepository := repository.NewSQLUserRepository()
+	userRepository := repository.NewSQLUserRepository(dbConnection)
 	userHandler := handlers.NewUserHandler(userRepository)
 	r.GET("/api/v1/users/:id", userHandler.GetUserById)
 	r.POST("/api/v1/users/", userHandler.CreateUser)
