@@ -2,7 +2,6 @@ package repository
 
 import (
 	"lesson08-prepare-connection/internal/models"
-	"log"
 
 	"gorm.io/gorm"
 )
@@ -18,11 +17,20 @@ func NewSQLUserRepository(db *gorm.DB) UserRepository {
 }
 
 // Create implements [UserRepository].
-func (s *SQLUserRepository) Create(user *models.User) {
-	log.Println("unimplemented")
+func (s *SQLUserRepository) Create(user *models.User) error {
+	if err := s.db.Create(user).Error; err != nil {
+
+		return err
+	}
+	return nil
 }
 
 // FindById implements [UserRepository].
-func (s *SQLUserRepository) FindById(id int) {
-	log.Println("unimplemented")
+func (s *SQLUserRepository) FindById(id int) (models.User, error) {
+	var user models.User
+	if err := s.db.First(&user, id).Error; err != nil {
+		return user, err
+	}
+	return user, nil
+
 }
