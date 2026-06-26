@@ -1,7 +1,7 @@
-package service
+package v1service
 
 import (
-	"user-management-api/internal/models"
+	"user-management-api/internal/db/sqlc"
 	"user-management-api/internal/repository"
 )
 
@@ -16,7 +16,7 @@ func NewUserService(repo repository.UserRepository) UserService {
 }
 
 // CreateUser implements [UserService].
-func (u *userService) CreateUser(userModel models.User) (models.User, error) {
+func (u *userService) CreateUser(userModel sqlc.User) (sqlc.User, error) {
 	panic("unimplemented")
 }
 
@@ -26,16 +26,16 @@ func (u *userService) DeleteUser(uuid string) error {
 }
 
 // FindUserByUUID implements [UserService].
-func (u *userService) FindUserByUUID(uuid string) (models.User, error) {
+func (u *userService) FindUserByUUID(uuid string) (sqlc.User, error) {
 	panic("unimplemented")
 }
 
 // Search implements [UserService].
-func (u *userService) Search(search string, page int, limit int) []models.User {
+func (u *userService) Search(search string, page int, limit int) []sqlc.User {
 	panic("unimplemented")
 }
 
 // UpdateUser implements [UserService].
-func (u *userService) UpdateUser(uuid string, userModel models.User) (models.User, error) {
+func (u *userService) UpdateUser(uuid string, userModel sqlc.User) (sqlc.User, error) {
 	panic("unimplemented")
 }

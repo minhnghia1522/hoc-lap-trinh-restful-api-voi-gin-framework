@@ -1,9 +1,6 @@
-package dto
+package v1dto
 
-import (
-	"strings"
-	"user-management-api/internal/models"
-)
+import "user-management-api/internal/db/sqlc"
 
 type UserDTO struct {
 	UUID   string `json:"uuid"`
@@ -32,40 +29,19 @@ type UpdateUserInput struct {
 	Level    int    `json:"level" binding:"required,oneof=1 2"`
 }
 
-func (input *CreateUserInput) MapCreateInputToModel() models.User {
-	return models.User{
-		Name:     strings.TrimSpace(input.Name),
-		Email:    strings.TrimSpace(input.Email),
-		Age:      input.Age,
-		Password: input.Password,
-		Status:   input.Status,
-		Level:    input.Level,
-	}
+func (input *CreateUserInput) MapCreateInputToModel() {
+
 }
 
-func (input *UpdateUserInput) MapUpdateInputToModel() models.User {
-	return models.User{
-		Name:     strings.TrimSpace(input.Name),
-		Email:    strings.TrimSpace(input.Email),
-		Age:      input.Age,
-		Password: input.Password,
-		Status:   input.Status,
-		Level:    input.Level,
-	}
+func (input *UpdateUserInput) MapUpdateInputToModel() {
+
 }
 
-func MapUserToDTO(user models.User) *UserDTO {
-	return &UserDTO{
-		UUID:   user.UUID,
-		Name:   user.Name,
-		Email:  user.Email,
-		Age:    user.Age,
-		Status: mapStatusText(user.Status),
-		Level:  mapLevelText(user.Level),
-	}
+func MapUserToDTO(user sqlc.User) *UserDTO {
+	return &UserDTO{}
 }
 
-func MapUsersToDTO(users []models.User) []UserDTO {
+func MapUsersToDTO(users []sqlc.User) []UserDTO {
 	dtos := make([]UserDTO, 0, len(users))
 
 	for _, users := range users {
