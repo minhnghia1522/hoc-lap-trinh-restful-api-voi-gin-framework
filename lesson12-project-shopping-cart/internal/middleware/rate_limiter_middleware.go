@@ -2,10 +2,13 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
+	"user-management-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 	"golang.org/x/time/rate"
 )
 
@@ -34,8 +37,15 @@ func getRateLimiter(ip string) *rate.Limiter {
 	mu.Lock()
 	defer mu.Unlock()
 	client, exists := clients[ip]
+	var err error
+	limit, err := strconv.ParseFloat(utils.GetEnv("RATE_LIMITER_REQUEST_SEC", "5"), 64)
+	brust, err := strconv.Atoi(utils.GetEnv("RATE_LIMITER_REQUEST_BRUST", "10"))
+	if err != nil {
+		panic("Invalid RATE_LIMITER_REQUEST: " + err.Error())
+	}
+
 	if !exists {
-		limiter := rate.NewLimiter(5, 10) // 5request/s, brust 10
+		limiter := rate.NewLimiter(rate.Limit(limit), brust) // 5request/s, brust 10
 
 		newClient := &Client{
 			limiter,
@@ -64,18 +74,50 @@ func CleanUpClients() {
 }
 
 // hey -n 20 -c 1 -H "X-API-Key:5bcd1d01-373f-4ae3-b745-c2c7f11935a2"  http://localhost:8080/api/v1/categories/
-func RateLimiterMiddleware() gin.HandlerFunc {
+func RateLimiterMiddleware(logger *zerolog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ip := getClientIP(ctx)
 
 		limiter := getRateLimiter(ip)
 
 		if !limiter.Allow() {
+			if shouldLogRateLimit(ip) {
+				logger.Info().Str("method", ctx.Request.Method).
+					Str("path", ctx.Request.URL.Path).
+					Str("query", ctx.Request.URL.RawQuery).
+					Str("client_ip", ctx.ClientIP()).
+					Str("user_agent", ctx.Request.UserAgent()).
+					Str("referer", ctx.Request.Referer()).
+					Str("protocol", ctx.Request.Proto).
+					Str("host", ctx.Request.Host).
+					Str("remote_addr", ctx.Request.RemoteAddr).
+					Str("request_uri", ctx.Request.RequestURI).
+					Any("headers", ctx.Request.Header).Msg("Rate limiter Log")
+			}
+
 			ctx.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
 				"error": "Too many request",
 			})
+
 			return
 		}
 		ctx.Next()
 	}
+}
+
+var rateLimitLogCache = sync.Map{}
+
+const rateLimitLogTTL = 5 * time.Second
+
+func shouldLogRateLimit(ip string) bool {
+	now := time.Now()
+
+	if val, ok := rateLimitLogCache.Load(ip); ok {
+		if t, ok := val.(time.Time); ok && now.Sub(t) < rateLimitLogTTL {
+			return false
+		}
+	}
+
+	rateLimitLogCache.Store(ip, now)
+	return true
 }

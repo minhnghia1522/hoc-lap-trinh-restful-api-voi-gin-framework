@@ -14,11 +14,12 @@ type Route interface {
 }
 
 func RegisterRoutes(r *gin.Engine, routes ...Route) {
-	httpLogger := newLoggerWithPath("../../internal/logs/recovery.log", "info")
+	httpLogger := newLoggerWithPath("../../internal/logs/http.log", "info")
 	recoveryLogger := newLoggerWithPath("../../internal/logs/recovery.log", "warning")
+	limiterLogger := newLoggerWithPath("../../internal/logs/limiter.log", "info")
 
 	r.Use(
-		middleware.RateLimiterMiddleware(),
+		middleware.RateLimiterMiddleware(limiterLogger),
 		middleware.LoggerMiddleware(httpLogger),
 		middleware.RecoveryMiddleware(recoveryLogger),
 		middleware.APIKeyMiddleware(),
