@@ -4,6 +4,8 @@ import (
 	"user-management-api/internal/middleware"
 
 	"github.com/gin-gonic/gin"
+	"github.com/natefinch/lumberjack"
+	"github.com/rs/zerolog"
 )
 
 type Route interface {
@@ -11,7 +13,26 @@ type Route interface {
 }
 
 func RegisterRoutes(r *gin.Engine, routes ...Route) {
-	r.Use(middleware.LoggerMiddleware(),
+	httpLogger := zerolog.New(&lumberjack.Logger{
+		Filename:   "../../internal/logs/http.log",
+		MaxSize:    1, // megabytes
+		MaxBackups: 5,
+		MaxAge:     5,    //days
+		Compress:   true, // disabled by default
+		LocalTime:  true,
+	}).With().Timestamp().Logger()
+
+	recoveryLogger := zerolog.New(&lumberjack.Logger{
+		Filename:   "../../internal/logs/recovery.log",
+		MaxSize:    1, // megabytes
+		MaxBackups: 5,
+		MaxAge:     5,    //days
+		Compress:   true, // disabled by default
+		LocalTime:  true,
+	}).With().Timestamp().Logger()
+
+	r.Use(middleware.LoggerMiddleware(&httpLogger),
+		middleware.RecoveryMiddleware(&recoveryLogger),
 		middleware.APIKeyMiddleware(),
 		middleware.AuthMiddleware(),
 		middleware.RateLimiterMiddleware())

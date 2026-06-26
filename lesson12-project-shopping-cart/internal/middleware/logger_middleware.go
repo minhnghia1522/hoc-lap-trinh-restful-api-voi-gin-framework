@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/natefinch/lumberjack"
 	"github.com/rs/zerolog"
 )
 
@@ -24,17 +23,7 @@ func (w *CustomResponseWriter) Write(data []byte) (n int, err error) {
 	return w.ResponseWriter.Write(data)
 }
 
-func LoggerMiddleware() gin.HandlerFunc {
-	logPath := "../../internal/logs/http.log"
-
-	logger := zerolog.New(&lumberjack.Logger{
-		Filename:   logPath,
-		MaxSize:    1, // megabytes
-		MaxBackups: 5,
-		MaxAge:     5,    //days
-		Compress:   true, // disabled by default
-		LocalTime:  true,
-	}).With().Timestamp().Logger()
+func LoggerMiddleware(httpLogger *zerolog.Logger) gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
 		start := time.Now()
@@ -71,7 +60,7 @@ func LoggerMiddleware() gin.HandlerFunc {
 		} else {
 			bodyBytes, err := io.ReadAll(ctx.Request.Body)
 			if err != nil {
-				logger.Error().Err(err).Msg("Failed to read request body")
+				httpLogger.Error().Err(err).Msg("Failed to read request body")
 			}
 			fmt.Printf("%+v", string(bodyBytes))
 			ctx.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
@@ -101,11 +90,11 @@ func LoggerMiddleware() gin.HandlerFunc {
 
 		duration := time.Since(start)
 		statusResponseCode := ctx.Writer.Status()
-		logEvent := logger.Info()
+		logEvent := httpLogger.Info()
 		if statusResponseCode >= 500 {
-			logEvent = logger.Error()
+			logEvent = httpLogger.Error()
 		} else if statusResponseCode >= 400 {
-			logEvent = logger.Warn()
+			logEvent = httpLogger.Warn()
 		}
 
 		responseContentType := ctx.Writer.Header().Get("Content-Type")
