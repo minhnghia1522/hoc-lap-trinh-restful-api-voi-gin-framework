@@ -1,7 +1,13 @@
 package app
 
 import (
+	"context"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 	"user-management-api/internal/config"
 	"user-management-api/internal/db"
 	"user-management-api/internal/routes"
@@ -45,7 +51,35 @@ func NewApplication(cfg *config.Config) *Application {
 }
 
 func (a *Application) Run() error {
-	return a.router.Run(a.config.ServerAddress)
+	server := &http.Server{
+		Addr:    a.config.ServerAddress,
+		Handler: a.router,
+	}
+
+	quite := make(chan os.Signal, 1)
+	// syscall.SIGINT -> Ctrl C
+	// syscall.SIGTERM -> Kill service
+	// syscall.SIGHUP -> Reload service
+	signal.Notify(quite, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+
+	go func() {
+		log.Printf("🍺 Server is running at %s \n", server.Addr)
+		if err := server.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatalf("❌ Failed to start server. %v", err)
+		}
+	}()
+
+	<-quite
+	log.Println("❗Shutdown signal received ...")
+
+	context, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(context); err != nil {
+		log.Fatalf("⛔ Server forced to shutdown ⛔. %v", err)
+	}
+	log.Println("🍺 Server exited gracefully.🍺")
+	return nil
 }
 
 func getModuleRoutes(modules []Module) []routes.Route {

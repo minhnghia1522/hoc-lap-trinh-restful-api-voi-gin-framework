@@ -40,7 +40,12 @@ migration-drop:
 migrate-goto:
 	migrate -path $(MIGRATION_DIRS) -database "$(CONN_STRING)" goto $(VERSION)
 
-sqlc-g:
+sqlc:
 	sqlc generate
+
+
+server:
+	cd cmd/api && go run .
+
 
 .PHONY: importdb exportdb migrate-create migrate-up migrate-down migrate-down-n migrate-force migration-drop migrate-goto sqlc-g

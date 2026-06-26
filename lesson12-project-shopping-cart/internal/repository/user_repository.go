@@ -7,10 +7,14 @@ import (
 	"github.com/google/uuid"
 )
 
-type userRepository struct{}
+type userRepository struct {
+	db *sqlc.Queries
+}
 
-func NewUserRepository() UserRepository {
-	return &userRepository{}
+func NewUserRepository(db *sqlc.Queries) UserRepository {
+	return &userRepository{
+		db: db,
+	}
 }
 
 // CountUsers implements [IUserRepository].
