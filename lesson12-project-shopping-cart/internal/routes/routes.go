@@ -2,9 +2,10 @@ package routes
 
 import (
 	"user-management-api/internal/middleware"
+	"user-management-api/internal/utils"
+	"user-management-api/pkg/logger"
 
 	"github.com/gin-gonic/gin"
-	"github.com/natefinch/lumberjack"
 	"github.com/rs/zerolog"
 )
 
@@ -13,33 +14,33 @@ type Route interface {
 }
 
 func RegisterRoutes(r *gin.Engine, routes ...Route) {
-	httpLogger := zerolog.New(&lumberjack.Logger{
-		Filename:   "../../internal/logs/http.log",
-		MaxSize:    1, // megabytes
-		MaxBackups: 5,
-		MaxAge:     5,    //days
-		Compress:   true, // disabled by default
-		LocalTime:  true,
-	}).With().Timestamp().Logger()
+	httpLogger := newLoggerWithPath("../../internal/logs/recovery.log", "info")
+	recoveryLogger := newLoggerWithPath("../../internal/logs/recovery.log", "warning")
 
-	recoveryLogger := zerolog.New(&lumberjack.Logger{
-		Filename:   "../../internal/logs/recovery.log",
-		MaxSize:    1, // megabytes
-		MaxBackups: 5,
-		MaxAge:     5,    //days
-		Compress:   true, // disabled by default
-		LocalTime:  true,
-	}).With().Timestamp().Logger()
-
-	r.Use(middleware.LoggerMiddleware(&httpLogger),
-		middleware.RecoveryMiddleware(&recoveryLogger),
+	r.Use(
+		middleware.RateLimiterMiddleware(),
+		middleware.LoggerMiddleware(httpLogger),
+		middleware.RecoveryMiddleware(recoveryLogger),
 		middleware.APIKeyMiddleware(),
 		middleware.AuthMiddleware(),
-		middleware.RateLimiterMiddleware())
+	)
 
 	api := r.Group("/api/v1")
 
 	for _, route := range routes {
 		route.Register(api)
 	}
+}
+
+func newLoggerWithPath(path string, level string) *zerolog.Logger {
+	config := logger.LoggerConfig{
+		Level:       level,
+		FileName:    path,
+		MaxSize:     1, // megabytes
+		MaxBackups:  5,
+		MaxAge:      5,    //days
+		Compress:    true, // disabled by default
+		Environment: utils.GetEnv("APP_ENV", "development"),
+	}
+	return logger.NewLogger(config)
 }
