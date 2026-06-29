@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"io"
 	"os"
 	"time"
@@ -8,6 +9,10 @@ import (
 	"github.com/natefinch/lumberjack"
 	"github.com/rs/zerolog"
 )
+
+type contextKey string
+
+const TraceIdKey contextKey = "trace_id"
 
 type LoggerConfig struct {
 	Level       string
@@ -43,4 +48,12 @@ func NewLogger(config LoggerConfig) *zerolog.Logger {
 	logger := zerolog.New(writer).With().Timestamp().Logger()
 
 	return &logger
+}
+
+func GetTraceID(ctx context.Context) string {
+	if traceID, ok := ctx.Value(TraceIdKey).(string); ok {
+		return traceID
+	}
+
+	return ""
 }

@@ -3,10 +3,8 @@ package routes
 import (
 	"user-management-api/internal/middleware"
 	"user-management-api/internal/utils"
-	"user-management-api/pkg/logger"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog"
 )
 
 type Route interface {
@@ -14,9 +12,9 @@ type Route interface {
 }
 
 func RegisterRoutes(r *gin.Engine, routes ...Route) {
-	httpLogger := newLoggerWithPath("../../internal/logs/http.log", "info")
-	recoveryLogger := newLoggerWithPath("../../internal/logs/recovery.log", "warning")
-	limiterLogger := newLoggerWithPath("../../internal/logs/limiter.log", "info")
+	httpLogger := utils.NewLoggerWithPath("../../internal/logs/http.log", "info")
+	recoveryLogger := utils.NewLoggerWithPath("../../internal/logs/recovery.log", "warning")
+	limiterLogger := utils.NewLoggerWithPath("../../internal/logs/limiter.log", "info")
 
 	r.Use(
 		middleware.RateLimiterMiddleware(limiterLogger),
@@ -31,17 +29,4 @@ func RegisterRoutes(r *gin.Engine, routes ...Route) {
 	for _, route := range routes {
 		route.Register(api)
 	}
-}
-
-func newLoggerWithPath(path string, level string) *zerolog.Logger {
-	config := logger.LoggerConfig{
-		Level:       level,
-		FileName:    path,
-		MaxSize:     1, // megabytes
-		MaxBackups:  5,
-		MaxAge:      5,    //days
-		Compress:    true, // disabled by default
-		Environment: utils.GetEnv("APP_ENV", "development"),
-	}
-	return logger.NewLogger(config)
 }
