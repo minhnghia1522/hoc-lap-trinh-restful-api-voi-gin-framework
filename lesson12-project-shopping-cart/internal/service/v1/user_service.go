@@ -3,6 +3,10 @@ package v1service
 import (
 	"user-management-api/internal/db/sqlc"
 	"user-management-api/internal/repository"
+	"user-management-api/internal/utils"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userService struct {
@@ -16,26 +20,37 @@ func NewUserService(repo repository.UserRepository) UserService {
 }
 
 // CreateUser implements [UserService].
-func (u *userService) CreateUser(userModel sqlc.User) (sqlc.User, error) {
-	panic("unimplemented")
+func (us *userService) CreateUser(ctx *gin.Context, userParam sqlc.CreateUserParams) (sqlc.User, error) {
+	context := ctx.Request.Context()
+	userParam.UserEmail = utils.NormalizeString(userParam.UserEmail)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userParam.UserPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return sqlc.User{}, utils.WrapError(err, "Failed to hash password", utils.ErrCodeInternal)
+	}
+	userParam.UserPassword = string(hashedPassword)
+	userCreated, err := us.repo.CreateUser(context, userParam)
+	if err != nil {
+		return sqlc.User{}, utils.WrapError(err, "Failed to insert user", utils.ErrCodeInternal)
+	}
+	return userCreated, nil
 }
 
 // DeleteUser implements [UserService].
-func (u *userService) DeleteUser(uuid string) error {
+func (us *userService) DeleteUser(uuid string) error {
 	panic("unimplemented")
 }
 
 // FindUserByUUID implements [UserService].
-func (u *userService) FindUserByUUID(uuid string) (sqlc.User, error) {
+func (us *userService) FindUserByUUID(uuid string) (sqlc.User, error) {
 	panic("unimplemented")
 }
 
 // Search implements [UserService].
-func (u *userService) Search(search string, page int, limit int) []sqlc.User {
+func (us *userService) Search(search string, page int, limit int) []sqlc.User {
 	panic("unimplemented")
 }
 
 // UpdateUser implements [UserService].
-func (u *userService) UpdateUser(uuid string, userModel sqlc.User) (sqlc.User, error) {
+func (us *userService) UpdateUser(uuid string, userModel sqlc.User) (sqlc.User, error) {
 	panic("unimplemented")
 }

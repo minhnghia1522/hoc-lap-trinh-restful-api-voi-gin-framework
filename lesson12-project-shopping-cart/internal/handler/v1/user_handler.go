@@ -69,12 +69,12 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
 		return
 	}
-	// userCreated, err := uh.service.CreateUser(createUserRequest.MapCreateInputToModel())
-	// if err != nil {
-	// 	utils.ResponseError(ctx, err)
-	// 	return
-	// }
-	utils.ResponseSuccess(ctx, http.StatusCreated, "")
+	userCreated, err := uh.service.CreateUser(ctx, createUserRequest.MapCreateInputToModel())
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+	utils.ResponseSuccess(ctx, http.StatusCreated, v1dto.MapUserToDTO(userCreated))
 }
 
 func (uh *UserHandler) UpdateUser(ctx *gin.Context) {

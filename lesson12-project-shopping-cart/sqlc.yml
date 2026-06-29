@@ -71,8 +71,14 @@ sql:
           # ==== Time and Date ====
           - db_type: "timestamptz"
             go_type: "time.Time"
+          
+          - db_type: "timestamptz"
+            go_type: "*time.Time"
+            nullable: true
+
           - db_type: "timestamp"
             go_type: "time.Time"
+            
           - db_type: "date"
             go_type: "time.Time"
 

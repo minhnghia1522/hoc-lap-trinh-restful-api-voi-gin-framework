@@ -1,14 +1,20 @@
 package v1dto
 
-import "user-management-api/internal/db/sqlc"
+import (
+	"time"
+	"user-management-api/internal/db/sqlc"
+	"user-management-api/internal/utils"
+)
 
 type UserDTO struct {
-	UUID   string `json:"uuid"`
-	Name   string `json:"full_name"`
-	Email  string `json:"email_address"`
-	Age    int    `json:"age"`
-	Status string `json:"status"`
-	Level  string `json:"level"`
+	UUID      string `json:"uuid"`
+	Name      string `json:"full_name"`
+	Email     string `json:"email_address"`
+	Age       *int   `json:"age"`
+	Status    string `json:"status"`
+	Level     string `json:"level"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type CreateUserInput struct {
@@ -29,7 +35,15 @@ type UpdateUserInput struct {
 	Level    int    `json:"level" binding:"required,oneof=1 2"`
 }
 
-func (input *CreateUserInput) MapCreateInputToModel() {
+func (input *CreateUserInput) MapCreateInputToModel() sqlc.CreateUserParams {
+	return sqlc.CreateUserParams{
+		UserEmail:    input.Email,
+		UserPassword: input.Password,
+		UserFullname: input.Email,
+		UserAge:      utils.ConvertToInt32Pointer(input.Age),
+		UserStatus:   int32(input.Status),
+		UserLevel:    int32(input.Level),
+	}
 
 }
 
@@ -38,7 +52,22 @@ func (input *UpdateUserInput) MapUpdateInputToModel() {
 }
 
 func MapUserToDTO(user sqlc.User) *UserDTO {
-	return &UserDTO{}
+	var age *int
+	if user.UserAge != nil {
+		v := int(*user.UserAge)
+		age = &v
+	}
+
+	return &UserDTO{
+		UUID:      user.UserUuid.String(),
+		Name:      user.UserFullname,
+		Email:     user.UserEmail,
+		Age:       age,
+		Status:    mapStatusText(int(user.UserStatus)),
+		Level:     mapLevelText(int(user.UserLevel)),
+		CreatedAt: user.UserCreatedAt.Format(time.DateTime),
+		UpdatedAt: user.UserUpdatedAt.Format(time.DateTime),
+	}
 }
 
 func MapUsersToDTO(users []sqlc.User) []UserDTO {
