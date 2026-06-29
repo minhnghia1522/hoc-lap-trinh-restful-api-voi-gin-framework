@@ -7,14 +7,15 @@ import (
 )
 
 type UserDTO struct {
-	UUID      string `json:"uuid"`
-	Name      string `json:"full_name"`
-	Email     string `json:"email_address"`
-	Age       *int   `json:"age"`
-	Status    string `json:"status"`
-	Level     string `json:"level"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	UUID      string  `json:"uuid"`
+	Name      string  `json:"full_name"`
+	Email     string  `json:"email_address"`
+	Age       *int    `json:"age,omitempty"`
+	Status    string  `json:"status"`
+	Level     string  `json:"level"`
+	CreatedAt string  `json:"created_at"`
+	UpdatedAt string  `json:"updated_at"`
+	DeletedAt *string `json:"deleted_at,omitempty"`
 }
 
 type CreateUserInput struct {
@@ -58,6 +59,12 @@ func MapUserToDTO(user sqlc.User) *UserDTO {
 		age = &v
 	}
 
+	var deletedAt *string
+	if user.UserDeletedAt != nil {
+		v := user.UserDeletedAt.Format(time.DateTime)
+		deletedAt = &v
+	}
+
 	return &UserDTO{
 		UUID:      user.UserUuid.String(),
 		Name:      user.UserFullname,
@@ -67,6 +74,7 @@ func MapUserToDTO(user sqlc.User) *UserDTO {
 		Level:     mapLevelText(int(user.UserLevel)),
 		CreatedAt: user.UserCreatedAt.Format(time.DateTime),
 		UpdatedAt: user.UserUpdatedAt.Format(time.DateTime),
+		DeletedAt: deletedAt,
 	}
 }
 
