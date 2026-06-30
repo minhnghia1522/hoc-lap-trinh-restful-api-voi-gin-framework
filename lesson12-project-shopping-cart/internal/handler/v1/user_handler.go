@@ -8,6 +8,7 @@ import (
 	"user-management-api/internal/validation"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type UserHandler struct {
@@ -54,8 +55,12 @@ func (uh *UserHandler) GetUserByUUID(ctx *gin.Context) {
 		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
 		return
 	}
-
-	model, err := uh.service.FindUserByUUID(ctx, params.Uuid)
+	userUuid, err := uuid.Parse(params.Uuid)
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+	model, err := uh.service.FindUserByUUID(ctx, userUuid)
 	if err != nil {
 		utils.ResponseError(ctx, err)
 		return
@@ -63,7 +68,7 @@ func (uh *UserHandler) GetUserByUUID(ctx *gin.Context) {
 	utils.ResponseSuccess(ctx, http.StatusOK, v1dto.MapUserToDTO(model))
 }
 
-func (uh *UserHandler) CreateUser(ctx *gin.Context) {
+func (uh *UserHandler) PostCreateUser(ctx *gin.Context) {
 	var createUserRequest v1dto.CreateUserInput
 	if err := ctx.ShouldBindBodyWithJSON(&createUserRequest); err != nil {
 		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
@@ -77,7 +82,7 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 	utils.ResponseSuccess(ctx, http.StatusCreated, v1dto.MapUserToDTO(userCreated))
 }
 
-func (uh *UserHandler) UpdateUser(ctx *gin.Context) {
+func (uh *UserHandler) PutUpdateUser(ctx *gin.Context) {
 	var params GetUserByUUIDParam
 	var err error
 	if err = ctx.ShouldBindUri(&params); err != nil {
@@ -90,7 +95,12 @@ func (uh *UserHandler) UpdateUser(ctx *gin.Context) {
 		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
 		return
 	}
-	userUpdated, err := uh.service.UpdateUser(ctx, params.Uuid, updateUserRequest.UpdatedAt, updateUserRequest.MapUpdateInputToModel())
+	userUuid, err := uuid.Parse(params.Uuid)
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+	userUpdated, err := uh.service.UpdateUser(ctx, userUuid, updateUserRequest.UpdatedAt, updateUserRequest.MapUpdateInputToModel())
 	if err != nil {
 		utils.ResponseError(ctx, err)
 		return
@@ -104,9 +114,80 @@ func (uh *UserHandler) DeleteUser(ctx *gin.Context) {
 		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
 		return
 	}
-	if err := uh.service.DeleteUser(params.Uuid); err != nil {
+
+	userUuid, err := uuid.Parse(params.Uuid)
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+
+	err = uh.service.DeleteUser(ctx, userUuid)
+	if err != nil {
 		utils.ResponseError(ctx, err)
 		return
 	}
 	utils.ResponseStatusCode(ctx, http.StatusNoContent)
+}
+
+func (uh *UserHandler) SoftDeleteUser(ctx *gin.Context) {
+	var params GetUserByUUIDParam
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
+		return
+	}
+
+	userUuid, err := uuid.Parse(params.Uuid)
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+
+	user, err := uh.service.SoftDeleteUser(ctx, userUuid)
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+	utils.ResponseSuccess(ctx, http.StatusOK, v1dto.MapUserToDTO(user))
+}
+
+func (uh *UserHandler) RestoreUser(ctx *gin.Context) {
+	var params GetUserByUUIDParam
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
+		return
+	}
+
+	userUuid, err := uuid.Parse(params.Uuid)
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+
+	user, err := uh.service.RestoreUser(ctx, userUuid)
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+	utils.ResponseSuccess(ctx, http.StatusOK, v1dto.MapUserToDTO(user))
+}
+
+func (uh *UserHandler) GetSoftDelete(ctx *gin.Context) {
+	var params GetUserByUUIDParam
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
+		return
+	}
+
+	userUuid, err := uuid.Parse(params.Uuid)
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+
+	user, err := uh.service.RestoreUser(ctx, userUuid)
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+	utils.ResponseSuccess(ctx, http.StatusOK, v1dto.MapUserToDTO(user))
 }

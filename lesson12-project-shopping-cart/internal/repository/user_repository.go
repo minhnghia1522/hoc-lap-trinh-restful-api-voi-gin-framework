@@ -54,7 +54,11 @@ func (repo *userRepository) GetUser(ctx context.Context, userUuid uuid.UUID) (sq
 
 // GetUserByEmail implements [IUserRepository].
 func (repo *userRepository) GetUserByEmail(ctx context.Context, userEmail string) (sqlc.User, error) {
-	panic("unimplemented")
+	user, err := repo.q.GetUserByEmail(ctx, userEmail)
+	if err != nil {
+		return sqlc.User{}, err
+	}
+	return user, nil
 }
 
 // ListUsersUserCreatedAtAsc implements [IUserRepository].
@@ -79,27 +83,47 @@ func (repo *userRepository) ListUsersUserIdDesc(ctx context.Context, arg sqlc.Li
 
 // RestoreUser implements [IUserRepository].
 func (repo *userRepository) RestoreUser(ctx context.Context, userUuid uuid.UUID) (sqlc.User, error) {
-	panic("unimplemented")
+	user, err := repo.q.RestoreUser(ctx, userUuid)
+	if err != nil {
+		return sqlc.User{}, err
+	}
+	return user, nil
 }
 
 // SoftDeleteUser implements [IUserRepository].
 func (repo *userRepository) SoftDeleteUser(ctx context.Context, userUuid uuid.UUID) (sqlc.User, error) {
-	panic("unimplemented")
+	user, err := repo.q.SoftDeleteUser(ctx, userUuid)
+	if err != nil {
+		return sqlc.User{}, err
+	}
+	return user, nil
 }
 
 // TrashUser implements [IUserRepository].
 func (repo *userRepository) TrashUser(ctx context.Context, userUuid uuid.UUID) (sqlc.User, error) {
-	panic("unimplemented")
+	user, err := repo.q.TrashUser(ctx, userUuid)
+	if err != nil {
+		return sqlc.User{}, err
+	}
+	return user, nil
 }
 
 // UpdatePassword implements [IUserRepository].
 func (repo *userRepository) UpdatePassword(ctx context.Context, arg sqlc.UpdatePasswordParams) (sqlc.User, error) {
-	panic("unimplemented")
+	user, err := repo.q.UpdatePassword(ctx, arg)
+	if err != nil {
+		return sqlc.User{}, err
+	}
+	return user, nil
 }
 
 // UpdateUser implements [IUserRepository].
 func (repo *userRepository) UpdateUser(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.User, error) {
-	panic("unimplemented")
+	user, err := repo.q.UpdateUser(ctx, arg)
+	if err != nil {
+		return sqlc.User{}, err
+	}
+	return user, nil
 }
 
 func (repo *userRepository) ExecTx(

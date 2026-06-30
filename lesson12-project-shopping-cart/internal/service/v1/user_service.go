@@ -45,15 +45,23 @@ func (us *userService) CreateUser(ctx *gin.Context, userParam sqlc.CreateUserPar
 }
 
 // DeleteUser implements [UserService].
-func (us *userService) DeleteUser(uuid string) error {
-	panic("unimplemented")
+func (us *userService) DeleteUser(ctx *gin.Context, uuid uuid.UUID) error {
+	context := ctx.Request.Context()
+	_, err := us.repo.TrashUser(context, uuid)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return utils.NewError("User not found", utils.ErrCodeNotFound)
+		}
+
+		return utils.WrapError(err, "failed to restore user", utils.ErrCodeInternal)
+	}
+	return nil
 }
 
 // FindUserByUUID implements [UserService].
-func (us *userService) FindUserByUUID(ctx *gin.Context, uuidPram string) (sqlc.User, error) {
+func (us *userService) FindUserByUUID(ctx *gin.Context, uuid uuid.UUID) (sqlc.User, error) {
 	context := ctx.Request.Context()
-	uuidParsed := uuid.MustParse(uuidPram)
-	user, err := us.repo.GetUser(context, uuidParsed)
+	user, err := us.repo.GetUser(context, uuid)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return sqlc.User{}, utils.NewError("User not found!", utils.ErrCodeNotFound)
@@ -69,13 +77,13 @@ func (us *userService) Search(search string, page int, limit int) []sqlc.User {
 }
 
 // UpdateUser implements [UserService].
-func (us *userService) UpdateUser(ctx *gin.Context, uuidParam string, updatedAt time.Time, params sqlc.UpdateUserParams) (sqlc.User, error) {
+func (us *userService) UpdateUser(ctx *gin.Context, uuid uuid.UUID, updatedAt time.Time, params sqlc.UpdateUserParams) (sqlc.User, error) {
 	context := ctx.Request.Context()
 	var updatedUser sqlc.User
-	userUuid := uuid.MustParse(uuidParam)
+
 	err := us.repo.ExecTx(context, func(q *sqlc.Queries) error {
 		var pgErr *pgconn.PgError
-		user, err := q.GetUserForUpdateNoWait(context, userUuid)
+		user, err := q.GetUserForUpdateNoWait(context, uuid)
 		if err != nil {
 			if errors.As(err, &pgErr) && pgErr.Code == "55P03" {
 				return utils.NewError("Data not available", utils.ErrCodeConflict)
@@ -87,7 +95,7 @@ func (us *userService) UpdateUser(ctx *gin.Context, uuidParam string, updatedAt 
 			return utils.NewError("User has updated before", utils.ErrCodeConflict)
 		}
 		time.Sleep(5 * time.Second)
-		params.UserUuid = userUuid
+		params.UserUuid = uuid
 		updatedUser, err = q.UpdateUser(ctx, params)
 		return err
 	})
@@ -98,4 +106,36 @@ func (us *userService) UpdateUser(ctx *gin.Context, uuidParam string, updatedAt 
 
 	return updatedUser, nil
 
+}
+
+// RestoreUser implements [UserService].
+func (us *userService) RestoreUser(ctx *gin.Context, uuid uuid.UUID) (sqlc.User, error) {
+	context := ctx.Request.Context()
+	user, err := us.repo.RestoreUser(context, uuid)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return sqlc.User{}, utils.NewError("User not found", utils.ErrCodeNotFound)
+		}
+
+		return sqlc.User{}, utils.WrapError(err, "failed to restore user", utils.ErrCodeInternal)
+	}
+	return user, nil
+}
+
+// SoftDeleteUser implements [UserService].
+func (us *userService) SoftDeleteUser(ctx *gin.Context, uuid uuid.UUID) (sqlc.User, error) {
+	context := ctx.Request.Context()
+	user, err := us.repo.SoftDeleteUser(context, uuid)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return sqlc.User{}, utils.NewError("User not found", utils.ErrCodeNotFound)
+		}
+
+		return sqlc.User{}, utils.WrapError(err, "failed to restore user", utils.ErrCodeInternal)
+	}
+	return user, nil
+}
+
+func (us *userService) GetAllUsers(ctx *gin.Context, search, orderBy, sort string, page, limit int32, deleted bool) ([]sqlc.User, int32, error) {
+	panic("unimplemented")
 }
