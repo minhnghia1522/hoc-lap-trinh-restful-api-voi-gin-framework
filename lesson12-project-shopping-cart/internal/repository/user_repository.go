@@ -31,7 +31,7 @@ func (repo *userRepository) GetUserForUpdateNoWait(ctx context.Context, userUuid
 
 // CountUsers implements [IUserRepository].
 func (repo *userRepository) CountUsers(ctx context.Context, arg sqlc.CountUsersParams) (int64, error) {
-	panic("unimplemented")
+	return repo.q.CountUsers(ctx, arg)
 }
 
 // CreateUser implements [IUserRepository].
@@ -143,4 +143,50 @@ func (repo *userRepository) ExecTx(
 	}
 
 	return tx.Commit(ctx)
+}
+
+// GetAll implements [UserRepository].
+func (repo *userRepository) GetAll(ctx context.Context, search string, orderBy string, sort string, limit int32, offset int32) ([]sqlc.User, error) {
+	var (
+		users []sqlc.User
+		err   error
+	)
+
+	switch {
+	case orderBy == "user_id" && sort == "asc":
+		users, err = repo.q.ListUsersUserIdAsc(ctx, sqlc.ListUsersUserIdAscParams{
+			Limit:  limit,
+			Offset: offset,
+			Search: search,
+		})
+	case orderBy == "user_id" && sort == "desc":
+		users, err = repo.q.ListUsersUserIdDesc(ctx, sqlc.ListUsersUserIdDescParams{
+			Limit:  limit,
+			Offset: offset,
+			Search: search,
+		})
+	case orderBy == "user_created_at" && sort == "asc":
+		users, err = repo.q.ListUsersUserCreatedAtAsc(ctx, sqlc.ListUsersUserCreatedAtAscParams{
+			Limit:  limit,
+			Offset: offset,
+			Search: search,
+		})
+	case orderBy == "user_created_at" && sort == "desc":
+		users, err = repo.q.ListUsersUserCreatedAtDesc(ctx, sqlc.ListUsersUserCreatedAtDescParams{
+			Limit:  limit,
+			Offset: offset,
+			Search: search,
+		})
+	}
+
+	if err != nil {
+		return []sqlc.User{}, err
+	}
+
+	return users, nil
+}
+
+// GetAllV2 implements [UserRepository].
+func (repo *userRepository) GetAllV2(ctx context.Context, search string, orderBy string, sort string, limit int32, offset int32, deleted bool) ([]sqlc.User, error) {
+	panic("unimplemented")
 }

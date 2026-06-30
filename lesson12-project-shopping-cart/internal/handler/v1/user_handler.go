@@ -19,12 +19,6 @@ type GetUserByUUIDParam struct {
 	Uuid string `uri:"uuid" binding:"uuid"`
 }
 
-type GetUsersParams struct {
-	Search string `form:"search" binding:"omitempty,min=3,max=50,search"`
-	Page   int    `form:"page" binding:"omitempty,gte=1,lte=100"`
-	Limit  int    `form:"limit" binding:"omitempty,gte=1,lte=100"`
-}
-
 func NewUserHandler(service v1service.UserService) *UserHandler {
 	return &UserHandler{
 		service: service,
@@ -32,7 +26,7 @@ func NewUserHandler(service v1service.UserService) *UserHandler {
 }
 
 func (uh *UserHandler) Search(ctx *gin.Context) {
-	var params GetUsersParams
+	var params v1dto.GetUsersParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
 	}
@@ -44,9 +38,15 @@ func (uh *UserHandler) Search(ctx *gin.Context) {
 	if params.Limit == 0 {
 		params.Limit = 10
 	}
-	// modelResultList := uh.service.Search(params.Search, params.Page, params.Limit)
+	users, total, err := uh.service.GetAllUsers(ctx, params.Search, params.Order, params.Sort, params.Page, params.Limit, false)
+	if err != nil {
+		utils.ResponseError(ctx, utils.NewError("Failed to get search user list", utils.ErrCodeInternal))
+		return
+	}
+	usersDTO := v1dto.MapUsersToDTO(users)
 
-	utils.ResponseSuccess(ctx, http.StatusOK, "")
+	paginationResp := utils.NewPaginationResponse(usersDTO, params.Page, params.Limit, total)
+	utils.ResponseSuccess(ctx, http.StatusOK, paginationResp)
 }
 
 func (uh *UserHandler) GetUserByUUID(ctx *gin.Context) {

@@ -31,7 +31,7 @@ func NewPagination(page, limit, totalRecords int32) *Pagination {
 	}
 }
 
-func NewPagiantionResponse(data any, page, limit, totalRecords int32) map[string]any {
+func NewPaginationResponse(data any, page, limit, totalRecords int32) map[string]any {
 	return map[string]any{
 		"data":       data,
 		"pagination": NewPagination(page, limit, totalRecords),

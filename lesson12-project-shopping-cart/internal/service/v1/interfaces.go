@@ -9,7 +9,7 @@ import (
 )
 
 type UserService interface {
-	Search(search string, page, limit int) []sqlc.User
+	GetAllUsers(ctx *gin.Context, search, orderBy, sort string, page, limit int32, deleted bool) ([]sqlc.User, int32, error)
 	FindUserByUUID(ctx *gin.Context, uuid uuid.UUID) (sqlc.User, error)
 	CreateUser(ctx *gin.Context, userParam sqlc.CreateUserParams) (sqlc.User, error)
 	UpdateUser(ctx *gin.Context, uuid uuid.UUID, updatedAt time.Time, params sqlc.UpdateUserParams) (sqlc.User, error)
