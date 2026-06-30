@@ -9,10 +9,12 @@ import (
 type ErrorCode string
 
 const (
-	ErrCodeBadRequest ErrorCode = "BAD_REQUEST"
-	ErrCodeNotFound   ErrorCode = "NOT_FOUND"
-	ErrCodeConflict   ErrorCode = "CONFLICT"
-	ErrCodeInternal   ErrorCode = "INTERNAL_SERVER_ERROR"
+	ErrCodeBadRequest      ErrorCode = "BAD_REQUEST"
+	ErrCodeNotFound        ErrorCode = "NOT_FOUND"
+	ErrCodeConflict        ErrorCode = "CONFLICT"
+	ErrCodeInternal        ErrorCode = "INTERNAL_SERVER_ERROR"
+	ErrCodeUnauthorized    ErrorCode = "UNAUTHORIZED"
+	ErrCodeTooManyRequests ErrorCode = "TOO_MANY_REQUESTS"
 )
 
 type AppError struct {
