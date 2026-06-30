@@ -7,6 +7,7 @@ import (
 	"user-management-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -47,8 +48,14 @@ func (us *userService) DeleteUser(uuid string) error {
 }
 
 // FindUserByUUID implements [UserService].
-func (us *userService) FindUserByUUID(uuid string) (sqlc.User, error) {
-	panic("unimplemented")
+func (us *userService) FindUserByUUID(ctx *gin.Context, uuidPram string) (sqlc.User, error) {
+	context := ctx.Request.Context()
+	uuidParsed := uuid.MustParse(uuidPram)
+	user, err := us.repo.GetUser(context, uuidParsed)
+	if err != nil {
+		return sqlc.User{}, utils.NewError("User not found!", utils.ErrCodeNotFound)
+	}
+	return user, nil
 }
 
 // Search implements [UserService].

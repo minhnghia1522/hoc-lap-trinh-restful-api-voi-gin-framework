@@ -33,7 +33,11 @@ func (repo *userRepository) CreateUser(ctx context.Context, userParam sqlc.Creat
 
 // GetUser implements [IUserRepository].
 func (repo *userRepository) GetUser(ctx context.Context, userUuid uuid.UUID) (sqlc.User, error) {
-	panic("unimplemented")
+	user, err := repo.db.GetUser(ctx, userUuid)
+	if err != nil {
+		return sqlc.User{}, err
+	}
+	return user, nil
 }
 
 // GetUserByEmail implements [IUserRepository].

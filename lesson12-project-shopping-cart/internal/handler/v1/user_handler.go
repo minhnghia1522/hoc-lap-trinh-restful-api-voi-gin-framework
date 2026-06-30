@@ -55,7 +55,7 @@ func (uh *UserHandler) GetUserByUUID(ctx *gin.Context) {
 		return
 	}
 
-	model, err := uh.service.FindUserByUUID(params.Uuid)
+	model, err := uh.service.FindUserByUUID(ctx, params.Uuid)
 	if err != nil {
 		utils.ResponseError(ctx, err)
 		return

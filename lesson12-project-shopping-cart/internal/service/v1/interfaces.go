@@ -8,7 +8,7 @@ import (
 
 type UserService interface {
 	Search(search string, page, limit int) []sqlc.User
-	FindUserByUUID(uuid string) (sqlc.User, error)
+	FindUserByUUID(ctx *gin.Context, uuid string) (sqlc.User, error)
 	CreateUser(ctx *gin.Context, userParam sqlc.CreateUserParams) (sqlc.User, error)
 	UpdateUser(uuid string, userModel sqlc.User) (sqlc.User, error)
 	DeleteUser(uuid string) error
