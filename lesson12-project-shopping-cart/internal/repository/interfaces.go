@@ -11,7 +11,7 @@ type UserRepository interface {
 	CountUsers(ctx context.Context, arg sqlc.CountUsersParams) (int64, error)
 	CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error)
 	GetUser(ctx context.Context, userUuid uuid.UUID) (sqlc.User, error)
-	GetUserForUpdate(ctx context.Context, userUuid uuid.UUID) (sqlc.User, error)
+	GetUserForUpdateNoWait(ctx context.Context, userUuid uuid.UUID) (sqlc.User, error)
 	GetUserByEmail(ctx context.Context, userEmail string) (sqlc.User, error)
 	ListUsersUserCreatedAtAsc(ctx context.Context, arg sqlc.ListUsersUserCreatedAtAscParams) ([]sqlc.User, error)
 	ListUsersUserCreatedAtDesc(ctx context.Context, arg sqlc.ListUsersUserCreatedAtDescParams) ([]sqlc.User, error)

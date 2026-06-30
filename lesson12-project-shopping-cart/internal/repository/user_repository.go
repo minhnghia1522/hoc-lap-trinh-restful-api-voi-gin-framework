@@ -20,9 +20,9 @@ func NewUserRepository(pool *pgxpool.Pool) UserRepository {
 	}
 }
 
-// GetUserForUpdate implements [UserRepository].
-func (repo *userRepository) GetUserForUpdate(ctx context.Context, userUuid uuid.UUID) (sqlc.User, error) {
-	user, err := repo.q.GetUserForUpdate(ctx, userUuid)
+// GetUserForUpdateNoWait implements [UserRepository].
+func (repo *userRepository) GetUserForUpdateNoWait(ctx context.Context, userUuid uuid.UUID) (sqlc.User, error) {
+	user, err := repo.q.GetUserForUpdateNoWait(ctx, userUuid)
 	if err != nil {
 		return sqlc.User{}, err
 	}

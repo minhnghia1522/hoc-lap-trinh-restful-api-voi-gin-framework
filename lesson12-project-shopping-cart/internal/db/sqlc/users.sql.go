@@ -143,7 +143,7 @@ AND user_uuid = $1
 FOR UPDATE NOWAIT
 `
 
-func (q *Queries) GetUserForUpdate(ctx context.Context, userUuid uuid.UUID) (User, error) {
+func (q *Queries) GetUserForUpdateNoWait(ctx context.Context, userUuid uuid.UUID) (User, error) {
 	row := q.db.QueryRow(ctx, getUserForUpdate, userUuid)
 	var i User
 	err := row.Scan(

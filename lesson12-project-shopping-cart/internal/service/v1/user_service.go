@@ -75,7 +75,7 @@ func (us *userService) UpdateUser(ctx *gin.Context, uuidParam string, updatedAt 
 	userUuid := uuid.MustParse(uuidParam)
 	err := us.repo.ExecTx(context, func(q *sqlc.Queries) error {
 		var pgErr *pgconn.PgError
-		user, err := q.GetUserForUpdate(context, userUuid)
+		user, err := q.GetUserForUpdateNoWait(context, userUuid)
 		if err != nil {
 			if errors.As(err, &pgErr) && pgErr.Code == "55P03" {
 				return utils.NewError("Data not available", utils.ErrCodeConflict)
