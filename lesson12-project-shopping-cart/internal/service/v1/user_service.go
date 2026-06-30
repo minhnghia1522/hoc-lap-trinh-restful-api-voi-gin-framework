@@ -71,11 +71,6 @@ func (us *userService) FindUserByUUID(ctx *gin.Context, uuid uuid.UUID) (sqlc.Us
 	return user, nil
 }
 
-// Search implements [UserService].
-func (us *userService) Search(search string, page int, limit int) []sqlc.User {
-	panic("unimplemented")
-}
-
 // UpdateUser implements [UserService].
 func (us *userService) UpdateUser(ctx *gin.Context, uuid uuid.UUID, updatedAt time.Time, params sqlc.UpdateUserParams) (sqlc.User, error) {
 	context := ctx.Request.Context()
@@ -157,15 +152,14 @@ func (us *userService) GetAllUsers(ctx *gin.Context, search, orderBy, sort strin
 	}
 
 	offset := (page - 1) * limit
-
-	users, err := us.repo.GetAll(context, search, orderBy, sort, limit, offset)
+	users, err := us.repo.GetAllV2(context, search, orderBy, sort, limit, offset, deleted)
 	if err != nil {
 		return []sqlc.User{}, 0, utils.WrapError(err, "failed to fetch users", utils.ErrCodeInternal)
 	}
 
 	total, err := us.repo.CountUsers(context, sqlc.CountUsersParams{
 		Search:  search,
-		Deleted: nil,
+		Deleted: &deleted,
 	})
 	if err != nil {
 		return []sqlc.User{}, 0, utils.WrapError(err, "failed to count users", utils.ErrCodeInternal)

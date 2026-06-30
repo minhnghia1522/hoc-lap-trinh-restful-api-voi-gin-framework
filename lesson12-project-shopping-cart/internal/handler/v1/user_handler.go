@@ -29,6 +29,7 @@ func (uh *UserHandler) Search(ctx *gin.Context) {
 	var params v1dto.GetUsersParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
+		return
 	}
 
 	if params.Page == 0 {
@@ -38,7 +39,13 @@ func (uh *UserHandler) Search(ctx *gin.Context) {
 	if params.Limit == 0 {
 		params.Limit = 10
 	}
-	users, total, err := uh.service.GetAllUsers(ctx, params.Search, params.Order, params.Sort, params.Page, params.Limit, false)
+
+	isDeleted := false
+	if params.Deleted != nil {
+		isDeleted = *params.Deleted
+	}
+
+	users, total, err := uh.service.GetAllUsers(ctx, params.Search, params.Order, params.Sort, params.Page, params.Limit, isDeleted)
 	if err != nil {
 		utils.ResponseError(ctx, utils.NewError("Failed to get search user list", utils.ErrCodeInternal))
 		return

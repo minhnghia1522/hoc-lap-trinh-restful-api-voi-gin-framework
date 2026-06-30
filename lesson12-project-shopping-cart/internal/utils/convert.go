@@ -28,6 +28,10 @@ func ConvertToInt32Pointer(value int) *int32 {
 	return &v
 }
 
+func Ptr[T any](v T) *T {
+	return &v
+}
+
 func CapitalizeFirst(s string) string {
 	if len(s) == 0 {
 		return s

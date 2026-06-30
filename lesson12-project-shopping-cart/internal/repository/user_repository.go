@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"user-management-api/internal/db/sqlc"
 
 	"github.com/google/uuid"
@@ -188,5 +189,64 @@ func (repo *userRepository) GetAll(ctx context.Context, search string, orderBy s
 
 // GetAllV2 implements [UserRepository].
 func (repo *userRepository) GetAllV2(ctx context.Context, search string, orderBy string, sort string, limit int32, offset int32, deleted bool) ([]sqlc.User, error) {
-	panic("unimplemented")
+	query := `SELECT *
+		FROM users
+		WHERE (
+			$1::TEXT IS NULL
+			OR $1::TEXT = ''
+			OR user_email ILIKE '%' || $1 || '%'
+			OR user_fullname ILIKE '%' || $1 || '%'
+		)`
+
+	if deleted {
+		query += " AND user_deleted_at IS NOT NULL"
+	} else {
+		query += " AND user_deleted_at IS NULL"
+	}
+
+	order := "ASC"
+	if sort == "desc" {
+		order = "DESC"
+	}
+
+	switch orderBy {
+	case "user_id", "user_created_at":
+		query += fmt.Sprintf(" ORDER BY %s %s", orderBy, order)
+	default:
+		query += " ORDER BY user_id ASC"
+	}
+
+	query += " LIMIT $2 OFFSET $3 -- name: Get All Version 2"
+
+	rows, err := repo.pool.Query(ctx, query, search, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	users := []sqlc.User{}
+	for rows.Next() {
+		var i sqlc.User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.UserUuid,
+			&i.UserEmail,
+			&i.UserPassword,
+			&i.UserFullname,
+			&i.UserAge,
+			&i.UserStatus,
+			&i.UserLevel,
+			&i.UserDeletedAt,
+			&i.UserCreatedAt,
+			&i.UserUpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		users = append(users, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
