@@ -1,7 +1,9 @@
 package v1service
 
 import (
+	"database/sql"
 	"errors"
+	"time"
 	"user-management-api/internal/db/sqlc"
 	"user-management-api/internal/repository"
 	"user-management-api/internal/utils"
@@ -53,7 +55,10 @@ func (us *userService) FindUserByUUID(ctx *gin.Context, uuidPram string) (sqlc.U
 	uuidParsed := uuid.MustParse(uuidPram)
 	user, err := us.repo.GetUser(context, uuidParsed)
 	if err != nil {
-		return sqlc.User{}, utils.NewError("User not found!", utils.ErrCodeNotFound)
+		if errors.Is(err, sql.ErrNoRows) {
+			return sqlc.User{}, utils.NewError("User not found!", utils.ErrCodeNotFound)
+		}
+		return sqlc.User{}, utils.WrapError(err, "failed to get an user", utils.ErrCodeInternal)
 	}
 	return user, nil
 }
@@ -64,6 +69,33 @@ func (us *userService) Search(search string, page int, limit int) []sqlc.User {
 }
 
 // UpdateUser implements [UserService].
-func (us *userService) UpdateUser(uuid string, userModel sqlc.User) (sqlc.User, error) {
-	panic("unimplemented")
+func (us *userService) UpdateUser(ctx *gin.Context, uuidParam string, updatedAt time.Time, params sqlc.UpdateUserParams) (sqlc.User, error) {
+	context := ctx.Request.Context()
+	var updatedUser sqlc.User
+	userUuid := uuid.MustParse(uuidParam)
+	err := us.repo.ExecTx(context, func(q *sqlc.Queries) error {
+		var pgErr *pgconn.PgError
+		user, err := q.GetUserForUpdate(context, userUuid)
+		if err != nil {
+			if errors.As(err, &pgErr) && pgErr.Code == "55P03" {
+				return utils.NewError("Data not available", utils.ErrCodeConflict)
+			}
+			return err
+		}
+
+		if !user.UserUpdatedAt.Equal(updatedAt) {
+			return utils.NewError("User has updated before", utils.ErrCodeConflict)
+		}
+		time.Sleep(5 * time.Second)
+		params.UserUuid = userUuid
+		updatedUser, err = q.UpdateUser(ctx, params)
+		return err
+	})
+
+	if err != nil {
+		return sqlc.User{}, err
+	}
+
+	return updatedUser, nil
+
 }

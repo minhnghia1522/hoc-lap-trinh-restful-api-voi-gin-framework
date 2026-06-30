@@ -7,15 +7,15 @@ import (
 )
 
 type UserDTO struct {
-	UUID      string  `json:"uuid"`
-	Name      string  `json:"full_name"`
-	Email     string  `json:"email_address"`
-	Age       *int    `json:"age,omitempty"`
-	Status    string  `json:"status"`
-	Level     string  `json:"level"`
-	CreatedAt string  `json:"created_at"`
-	UpdatedAt string  `json:"updated_at"`
-	DeletedAt *string `json:"deleted_at,omitempty"`
+	UUID      string    `json:"uuid"`
+	Name      string    `json:"full_name"`
+	Email     string    `json:"email_address"`
+	Age       *int      `json:"age,omitempty"`
+	Status    string    `json:"status"`
+	Level     string    `json:"level"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	DeletedAt *string   `json:"deleted_at,omitempty"`
 }
 
 type CreateUserInput struct {
@@ -28,12 +28,11 @@ type CreateUserInput struct {
 }
 
 type UpdateUserInput struct {
-	Name     string `json:"name" binding:"required"`
-	Email    string `json:"email" binding:"required,email,email_advanced"`
-	Age      int    `json:"age" binding:"required,gt=0"`
-	Password string `json:"password" binding:"omitempty,min=8,password_strong"`
-	Status   int    `json:"status" binding:"required,oneof=1 2"`
-	Level    int    `json:"level" binding:"required,oneof=1 2"`
+	Name      string    `json:"name" binding:"required"`
+	Age       int       `json:"age" binding:"omitempty,gt=1,lt=150"`
+	Status    int       `json:"status" binding:"required,oneof=1 2"`
+	Level     int       `json:"level" binding:"required,oneof=1 2"`
+	UpdatedAt time.Time `json:"updated_at" binding:"required"`
 }
 
 func (input *CreateUserInput) MapCreateInputToModel() sqlc.CreateUserParams {
@@ -48,8 +47,13 @@ func (input *CreateUserInput) MapCreateInputToModel() sqlc.CreateUserParams {
 
 }
 
-func (input *UpdateUserInput) MapUpdateInputToModel() {
-
+func (input *UpdateUserInput) MapUpdateInputToModel() sqlc.UpdateUserParams {
+	return sqlc.UpdateUserParams{
+		UserFullname: &input.Name,
+		UserAge:      utils.ConvertToInt32Pointer(input.Age),
+		UserStatus:   utils.ConvertToInt32Pointer(input.Status),
+		UserLevel:    utils.ConvertToInt32Pointer(input.Level),
+	}
 }
 
 func MapUserToDTO(user sqlc.User) *UserDTO {
@@ -72,8 +76,8 @@ func MapUserToDTO(user sqlc.User) *UserDTO {
 		Age:       age,
 		Status:    mapStatusText(int(user.UserStatus)),
 		Level:     mapLevelText(int(user.UserLevel)),
-		CreatedAt: user.UserCreatedAt.Format(time.DateTime),
-		UpdatedAt: user.UserUpdatedAt.Format(time.DateTime),
+		CreatedAt: user.UserCreatedAt,
+		UpdatedAt: user.UserUpdatedAt,
 		DeletedAt: deletedAt,
 	}
 }

@@ -5,16 +5,28 @@ import (
 	"user-management-api/internal/db/sqlc"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type userRepository struct {
-	db *sqlc.Queries
+	pool *pgxpool.Pool
+	q    *sqlc.Queries
 }
 
-func NewUserRepository(db *sqlc.Queries) UserRepository {
+func NewUserRepository(pool *pgxpool.Pool) UserRepository {
 	return &userRepository{
-		db: db,
+		pool: pool,
+		q:    sqlc.New(pool),
 	}
+}
+
+// GetUserForUpdate implements [UserRepository].
+func (repo *userRepository) GetUserForUpdate(ctx context.Context, userUuid uuid.UUID) (sqlc.User, error) {
+	user, err := repo.q.GetUserForUpdate(ctx, userUuid)
+	if err != nil {
+		return sqlc.User{}, err
+	}
+	return user, nil
 }
 
 // CountUsers implements [IUserRepository].
@@ -24,7 +36,7 @@ func (repo *userRepository) CountUsers(ctx context.Context, arg sqlc.CountUsersP
 
 // CreateUser implements [IUserRepository].
 func (repo *userRepository) CreateUser(ctx context.Context, userParam sqlc.CreateUserParams) (sqlc.User, error) {
-	userCreated, err := repo.db.CreateUser(ctx, userParam)
+	userCreated, err := repo.q.CreateUser(ctx, userParam)
 	if err != nil {
 		return sqlc.User{}, err
 	}
@@ -33,7 +45,7 @@ func (repo *userRepository) CreateUser(ctx context.Context, userParam sqlc.Creat
 
 // GetUser implements [IUserRepository].
 func (repo *userRepository) GetUser(ctx context.Context, userUuid uuid.UUID) (sqlc.User, error) {
-	user, err := repo.db.GetUser(ctx, userUuid)
+	user, err := repo.q.GetUser(ctx, userUuid)
 	if err != nil {
 		return sqlc.User{}, err
 	}
@@ -88,4 +100,23 @@ func (repo *userRepository) UpdatePassword(ctx context.Context, arg sqlc.UpdateP
 // UpdateUser implements [IUserRepository].
 func (repo *userRepository) UpdateUser(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.User, error) {
 	panic("unimplemented")
+}
+
+func (repo *userRepository) ExecTx(
+	ctx context.Context,
+	fn func(*sqlc.Queries) error,
+) error {
+	tx, err := repo.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	q := repo.q.WithTx(tx)
+
+	if err := fn(q); err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
 }

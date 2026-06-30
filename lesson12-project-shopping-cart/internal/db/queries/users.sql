@@ -61,6 +61,12 @@ SELECT * FROM users
 WHERE user_deleted_at IS NULL
 AND user_uuid = $1;
 
+-- name: GetUserForUpdate :one
+SELECT * FROM users
+WHERE user_deleted_at IS NULL
+AND user_uuid = $1
+FOR UPDATE NOWAIT;
+
 -- name: GetUserByEmail :one
 SELECT * FROM users
 WHERE user_deleted_at IS NULL

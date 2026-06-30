@@ -90,12 +90,12 @@ func (uh *UserHandler) UpdateUser(ctx *gin.Context) {
 		utils.ResponseBadRequest(ctx, validation.HandleValidationErrors(err))
 		return
 	}
-	// userUpdated, err := uh.service.UpdateUser(params.Uuid, "")
+	userUpdated, err := uh.service.UpdateUser(ctx, params.Uuid, updateUserRequest.UpdatedAt, updateUserRequest.MapUpdateInputToModel())
 	if err != nil {
 		utils.ResponseError(ctx, err)
 		return
 	}
-	utils.ResponseSuccess(ctx, http.StatusOK, "")
+	utils.ResponseSuccess(ctx, http.StatusOK, v1dto.MapUserToDTO(userUpdated))
 }
 
 func (uh *UserHandler) DeleteUser(ctx *gin.Context) {

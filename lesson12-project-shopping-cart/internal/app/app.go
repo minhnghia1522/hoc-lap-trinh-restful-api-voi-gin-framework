@@ -38,7 +38,7 @@ func NewApplication(cfg *config.Config) *Application {
 	r := gin.Default()
 
 	modules := []Module{
-		NewUserModule(),
+		NewUserModule(db.Pool),
 	}
 
 	routes.RegisterRoutes(r, getModuleRoutes(modules)...)

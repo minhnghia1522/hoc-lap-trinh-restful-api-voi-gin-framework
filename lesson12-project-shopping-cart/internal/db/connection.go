@@ -14,7 +14,10 @@ import (
 	"github.com/jackc/pgx/v5/tracelog"
 )
 
-var DB *sqlc.Queries
+var (
+	Pool *pgxpool.Pool
+	DB   *sqlc.Queries
+)
 
 func InitDB(appConfig *config.Config) error {
 	connStr := appConfig.DNS()
@@ -51,11 +54,12 @@ func InitDB(appConfig *config.Config) error {
 	}
 
 	if err := DBPool.Ping(ctx); err != nil {
-		DBPool.Close()
+		Pool.Close()
 		return fmt.Errorf("DB ping error %v", err)
 	}
 
-	DB = sqlc.New(DBPool)
+	Pool = DBPool
+	DB = sqlc.New(Pool)
 
 	log.Println("Database connected")
 	return nil
