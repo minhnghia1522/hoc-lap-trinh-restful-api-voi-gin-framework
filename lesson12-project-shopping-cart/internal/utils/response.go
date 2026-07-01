@@ -111,6 +111,10 @@ func httpStatusFromCode(code ErrorCode) int {
 		return http.StatusNotFound
 	case ErrCodeConflict:
 		return http.StatusConflict
+	case ErrCodeUnauthorized:
+		return http.StatusUnauthorized
+	case ErrCodeTooManyRequests:
+		return http.StatusTooManyRequests
 	default:
 		return http.StatusInternalServerError
 	}

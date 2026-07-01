@@ -57,10 +57,10 @@ func NewApplication(cfg *config.Config) *Application {
 
 	modules := []Module{
 		NewUserModule(ctx),
-		NewAuthModule(ctx, tokenService, nil, nil, nil),
+		NewAuthModule(ctx, tokenService, redisService, nil, nil),
 	}
 
-	routes.RegisterRoutes(r, tokenService, getModuleRoutes(modules)...)
+	routes.RegisterRoutes(r, tokenService, redisService, getModuleRoutes(modules)...)
 
 	return &Application{
 		config:  cfg,

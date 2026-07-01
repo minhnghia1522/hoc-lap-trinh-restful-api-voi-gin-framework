@@ -5,6 +5,7 @@ import (
 	v1routes "user-management-api/internal/routes/v1"
 	"user-management-api/internal/utils"
 	"user-management-api/pkg/auth"
+	"user-management-api/pkg/cache"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ type Route interface {
 	Register(r *gin.RouterGroup)
 }
 
-func RegisterRoutes(r *gin.Engine, tokenService auth.TokenService, routes ...Route) {
+func RegisterRoutes(r *gin.Engine, tokenService auth.TokenService, cacheService cache.RedisCacheService, routes ...Route) {
 	httpLogger := utils.NewLoggerWithPath("../../internal/logs/http.log", "info")
 	recoveryLogger := utils.NewLoggerWithPath("../../internal/logs/recovery.log", "warning")
 	limiterLogger := utils.NewLoggerWithPath("../../internal/logs/limiter.log", "info")
@@ -31,7 +32,8 @@ func RegisterRoutes(r *gin.Engine, tokenService auth.TokenService, routes ...Rou
 	v1api := r.Group("/api/v1")
 
 	protected := v1api.Group("")
-	protected.Use(middleware.AuthMiddleware(tokenService))
+	middleware.InitAuthMiddleware(tokenService, cacheService)
+	protected.Use(middleware.AuthMiddleware())
 
 	for _, route := range routes {
 		switch route := route.(type) {
