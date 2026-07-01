@@ -18,6 +18,7 @@ func RegisterRoutes(r *gin.Engine, routes ...Route) {
 	limiterLogger := utils.NewLoggerWithPath("../../internal/logs/limiter.log", "info")
 
 	r.Use(
+		middleware.CORSMiddleware(),
 		middleware.RateLimiterMiddleware(limiterLogger),
 		middleware.TraceMiddleware(),
 		middleware.LoggerMiddleware(httpLogger),
