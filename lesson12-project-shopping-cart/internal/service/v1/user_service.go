@@ -230,3 +230,14 @@ func (us *userService) generateCacheKey(search, orderBy, sort string, page, limi
 
 	return fmt.Sprintf("users:%s:%s:%s:%d:%d:%t", search, orderBy, sort, page, limit, deleted)
 }
+
+func (us *userService) GetMe(ctx *gin.Context, uuid uuid.UUID) (sqlc.User, error) {
+	context := ctx.Request.Context()
+
+	user, err := us.repo.GetUser(context, uuid)
+	if err != nil {
+		return sqlc.User{}, utils.NewError("User not found", utils.ErrCodeNotFound)
+	}
+
+	return user, nil
+}

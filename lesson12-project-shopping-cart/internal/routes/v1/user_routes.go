@@ -26,5 +26,6 @@ func (ur *UserRoutes) Register(r *gin.RouterGroup) {
 		route.PUT("/:uuid/restore", ur.handler.RestoreUser)
 		route.DELETE("/:uuid", ur.handler.SoftDeleteUser)
 		route.DELETE("/:uuid/trash", ur.handler.DeleteUser)
+		route.GET("/me", ur.handler.GetMe)
 	}
 }

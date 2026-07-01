@@ -54,12 +54,13 @@ func NewApplication(cfg *config.Config) *Application {
 	r := gin.Default()
 
 	tokenService := auth.NewJWTService(redisService)
+
 	modules := []Module{
 		NewUserModule(ctx),
 		NewAuthModule(ctx, tokenService, nil, nil, nil),
 	}
 
-	routes.RegisterRoutes(r, getModuleRoutes(modules)...)
+	routes.RegisterRoutes(r, tokenService, getModuleRoutes(modules)...)
 
 	return &Application{
 		config:  cfg,

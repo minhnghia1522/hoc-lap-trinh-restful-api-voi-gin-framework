@@ -198,3 +198,19 @@ func (uh *UserHandler) GetSoftDelete(ctx *gin.Context) {
 	}
 	utils.ResponseSuccess(ctx, http.StatusOK, v1dto.MapUserToDTO(user))
 }
+
+func (uh *UserHandler) GetMe(ctx *gin.Context) {
+	userUUID := ctx.MustGet("user_uuid").(string)
+	uuid, err := uuid.Parse(userUUID)
+	if err != nil {
+		utils.ResponseError(ctx, utils.NewError("Error when get user", utils.ErrCodeInternal))
+		return
+	}
+
+	user, err := uh.service.GetMe(ctx, uuid)
+	if err != nil {
+		utils.ResponseError(ctx, utils.NewError("User not exist or deleted", utils.ErrCodeNotFound))
+		return
+	}
+	utils.ResponseSuccess(ctx, http.StatusOK, v1dto.MapUserToDTO(user))
+}

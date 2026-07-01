@@ -16,6 +16,7 @@ type UserService interface {
 	DeleteUser(ctx *gin.Context, uuid uuid.UUID) error
 	SoftDeleteUser(ctx *gin.Context, uuid uuid.UUID) (sqlc.User, error)
 	RestoreUser(ctx *gin.Context, uuid uuid.UUID) (sqlc.User, error)
+	GetMe(ctx *gin.Context, uuid uuid.UUID) (sqlc.User, error)
 }
 
 type AuthService interface {
