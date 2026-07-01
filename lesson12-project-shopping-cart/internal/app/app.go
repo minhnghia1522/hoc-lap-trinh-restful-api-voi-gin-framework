@@ -14,11 +14,18 @@ import (
 	"user-management-api/internal/validation"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 )
 
 type Module interface {
 	Routes() routes.Route
+}
+
+type ModuleContext struct {
+	pool  *pgxpool.Pool
+	Redis *redis.Client
 }
 
 type Application struct {
@@ -31,14 +38,23 @@ func NewApplication(cfg *config.Config) *Application {
 
 	loadEnv()
 	appConfig := config.NewConfig()
-	db.InitDB(appConfig)
+	if err := db.InitDB(appConfig); err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+
+	redisClient := config.NewRedisClient()
 
 	validation.InitValidator()
 
 	r := gin.Default()
 
+	ctx := &ModuleContext{
+		pool:  db.Pool,
+		Redis: redisClient,
+	}
+
 	modules := []Module{
-		NewUserModule(db.Pool),
+		NewUserModule(ctx),
 	}
 
 	routes.RegisterRoutes(r, getModuleRoutes(modules)...)

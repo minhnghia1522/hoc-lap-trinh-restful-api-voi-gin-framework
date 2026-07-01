@@ -6,19 +6,17 @@ import (
 	"user-management-api/internal/routes"
 	v1routes "user-management-api/internal/routes/v1"
 	v1service "user-management-api/internal/service/v1"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type UserModule struct {
 	routes routes.Route
 }
 
-func NewUserModule(pool *pgxpool.Pool) *UserModule {
+func NewUserModule(ctx *ModuleContext) *UserModule {
 	// Initialize repository
-	userRepo := repository.NewUserRepository(pool)
+	userRepo := repository.NewUserRepository(ctx.pool)
 	// Initialize service
-	userService := v1service.NewUserService(userRepo)
+	userService := v1service.NewUserService(userRepo, ctx.Redis)
 	// Initialize handler
 	userHandler := v1handler.NewUserHandler(userService)
 	// Initialize routes
