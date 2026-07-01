@@ -15,19 +15,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type userService struct {
 	repo  repository.UserRepository
-	cache *cache.RedisCacheService
+	cache cache.RedisCacheService
 }
 
-func NewUserService(repo repository.UserRepository, redisClient *redis.Client) UserService {
+func NewUserService(repo repository.UserRepository, cache cache.RedisCacheService) UserService {
 	return &userService{
 		repo:  repo,
-		cache: cache.NewRedisCacheService(redisClient),
+		cache: cache,
 	}
 }
 

@@ -15,11 +15,27 @@ type DatabaseConfig struct {
 }
 
 type Config struct {
-	ServerAddress string
-	DB            DatabaseConfig
+	ServerAddress      string
+	DB                 DatabaseConfig
+	MailProviderType   string
+	MailProviderConfig map[string]any
 }
 
 func NewConfig() *Config {
+	mailProviderConfig := make(map[string]any)
+
+	mailProviderType := utils.GetEnv("MAIL_PROVIDER_TYPE", "mailtrap")
+	if mailProviderType == "mailtrap" {
+		mailtrapConfig := map[string]any{
+			"mail_sender":      utils.GetEnv("MAILTRAP_MAIL_SENDER", "admin@codewithtuan.com"),
+			"name_sender":      utils.GetEnv("MAILTRAP_NAME_SENDER", "Support Team Code With Tuan"),
+			"mailtrap_url":     utils.GetEnv("MAILTRAP_URL", "https://sandbox.api.mailtrap.io/api/send/3940849"),
+			"mailtrap_api_key": utils.GetEnv("MAILTRAP_API_KEY", "MAILTRAP_API_KEYb7a810cf4d64e1778c7e4679907e8546"),
+		}
+
+		mailProviderConfig["mailtrap"] = mailtrapConfig
+	}
+
 	return &Config{
 		ServerAddress: "127.0.0.1:8090",
 		DB: DatabaseConfig{
@@ -30,6 +46,8 @@ func NewConfig() *Config {
 			Password: utils.GetEnv("DB_PASS", "postgres"),
 			SSLMode:  utils.GetEnv("DB_SSLMODE", "disable"),
 		},
+		MailProviderType:   mailProviderType,
+		MailProviderConfig: mailProviderConfig,
 	}
 }
 

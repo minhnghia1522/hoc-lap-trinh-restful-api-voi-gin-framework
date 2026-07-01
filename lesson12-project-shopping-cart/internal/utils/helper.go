@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"os"
 	"strconv"
 	"user-management-api/pkg/logger"
@@ -40,4 +42,13 @@ func NewLoggerWithPath(path string, level string) *zerolog.Logger {
 		Environment: GetEnv("APP_ENV", "development"),
 	}
 	return logger.NewLogger(config)
+}
+
+func GenerateRandomString(length int) (string, error) {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+
+	return base64.URLEncoding.EncodeToString(bytes), nil
 }

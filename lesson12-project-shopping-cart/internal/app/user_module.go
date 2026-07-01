@@ -16,7 +16,7 @@ func NewUserModule(ctx *ModuleContext) *UserModule {
 	// Initialize repository
 	userRepo := repository.NewUserRepository(ctx.pool)
 	// Initialize service
-	userService := v1service.NewUserService(userRepo, ctx.Redis)
+	userService := v1service.NewUserService(userRepo, ctx.Cache)
 	// Initialize handler
 	userHandler := v1handler.NewUserHandler(userService)
 	// Initialize routes

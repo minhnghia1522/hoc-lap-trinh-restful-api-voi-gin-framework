@@ -12,11 +12,12 @@ import (
 	"user-management-api/internal/db"
 	"user-management-api/internal/routes"
 	"user-management-api/internal/validation"
+	"user-management-api/pkg/auth"
+	"user-management-api/pkg/cache"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
-	"github.com/redis/go-redis/v9"
 )
 
 type Module interface {
@@ -25,7 +26,7 @@ type Module interface {
 
 type ModuleContext struct {
 	pool  *pgxpool.Pool
-	Redis *redis.Client
+	Cache cache.RedisCacheService
 }
 
 type Application struct {
@@ -43,18 +44,19 @@ func NewApplication(cfg *config.Config) *Application {
 	}
 
 	redisClient := config.NewRedisClient()
-
-	validation.InitValidator()
-
-	r := gin.Default()
-
+	redisService := cache.NewRedisCacheService(redisClient)
 	ctx := &ModuleContext{
 		pool:  db.Pool,
-		Redis: redisClient,
+		Cache: redisService,
 	}
 
+	validation.InitValidator()
+	r := gin.Default()
+
+	tokenService := auth.NewJWTService(redisService)
 	modules := []Module{
 		NewUserModule(ctx),
+		NewAuthModule(ctx, tokenService, nil, nil, nil),
 	}
 
 	routes.RegisterRoutes(r, getModuleRoutes(modules)...)
