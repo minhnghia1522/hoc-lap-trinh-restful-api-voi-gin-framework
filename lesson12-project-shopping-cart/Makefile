@@ -44,7 +44,7 @@ sqlc:
 	sqlc generate
 
 server:
-	cd cmd/api && go run .
+	cd ./cmd/api && go run .
 
 build:
 	go build -o bin/app ./cmd/api/
