@@ -27,7 +27,7 @@ func InitDB(appConfig *config.Config) error {
 		return fmt.Errorf("error parsing config %v", err)
 	}
 
-	sqlLogger := utils.NewLoggerWithPath("../../internal/logs/sql.log", "info")
+	sqlLogger := utils.NewLoggerWithPath("sql.log", "info")
 
 	conf.MaxConns = 50
 	conf.MinConns = 5

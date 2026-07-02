@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 	"user-management-api/internal/config"
@@ -36,7 +37,6 @@ type Application struct {
 }
 
 func NewApplication(cfg *config.Config) *Application {
-
 	loadEnv()
 	appConfig := config.NewConfig()
 	if err := db.InitDB(appConfig); err != nil {
@@ -110,7 +110,15 @@ func getModuleRoutes(modules []Module) []routes.Route {
 }
 
 func loadEnv() {
-	if err := godotenv.Load("../../.env"); err != nil {
-		log.Printf("No .env file Found")
+	cmd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Failed to get working directory: %v", err)
 	}
+	envPath := filepath.Join(cmd, ".env")
+	if err := godotenv.Load(envPath); err != nil {
+		log.Printf("No .env file Found at %s ", envPath)
+	} else {
+		log.Printf("Load environment from %s successful", envPath)
+	}
+
 }

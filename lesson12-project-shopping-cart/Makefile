@@ -43,9 +43,14 @@ migrate-goto:
 sqlc:
 	sqlc generate
 
-
 server:
 	cd cmd/api && go run .
 
+build:
+	go build -o bin/app ./cmd/api/
 
-.PHONY: importdb exportdb migrate-create migrate-up migrate-down migrate-down-n migrate-force migration-drop migrate-goto sqlc-g
+build-exe:
+	go build -o bin/app.exe ./cmd/api/
+
+
+.PHONY: importdb exportdb migrate-create migrate-up migrate-down migrate-down-n migrate-force migration-drop migrate-goto sqlc-g build build-exe server
