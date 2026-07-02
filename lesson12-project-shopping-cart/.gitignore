@@ -1,0 +1,28 @@
+# Local environment
+.env
+.env.local
+.env.*.local
+!.env.sample
+
+# Air / build output
+tmp/
+bin/
+dist/
+build/
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Logs
+*.log
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

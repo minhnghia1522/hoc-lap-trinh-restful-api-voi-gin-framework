@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:17.5-alpine3.22
+    container_name: db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: master-golang
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: nghja@123456
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-networks
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+  redis:
+    image: redis:8.0-alpine
+    container_name: redis-go
+    restart: unless-stopped
+    environment:
+      REDIS_DB: ${REDIS_DB}
+      REDIS_USER: ${REDIS_USER}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./system/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - app-networks
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: go-api-shopping-cart
+    restart: unless-stopped
+    ports:
+      - "8090:8080"
+    volumes:
+      - ./:/app
+    networks:
+      - app-networks
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  redis-data:
+
+networks:
+  app-networks:
+    driver: bridge

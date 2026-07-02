@@ -3,17 +3,19 @@ export
 
 CONNECTION_STR = postgresql://$(DB_USER):$(DB_PASS)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSLMODE)
 MIGRATION_DIRS = internal/db/migrations
-DOCKER_COMPOSE_FILE = docker-compose.yml
+PROD_COMPOSE = docker-compose.prod.yml
+NOAPP_COMPOSE = docker-compose.noapp.yml
+DEV_COMPOSE = docker-compose.dev.yml
 
 ENV_FILE = .env
 
 # Import Database
 importdb:
-	docker exec -i postgres-db-go psql -U root -d master-golang < ./backupdb-master-golang.sql
+	docker exec -i db psql -U root -d master-golang < ./backupdb-master-golang.sql
 
 # Export Database
 exportdb:
-	docker exec -i postgres-db-go pg_dump -U root -d master-golang > ./backupdb-master-golang.sql
+	docker exec -i db pg_dump -U root -d master-golang > ./backupdb-master-golang.sql
 
 # Create new migration
 migrate-create:
@@ -47,7 +49,7 @@ sqlc:
 	sqlc generate
 
 server:
-	cd ./cmd/api && go run .
+	go run ./cmd/api
 
 build:
 	go build -o bin/app ./cmd/api/
@@ -55,12 +57,35 @@ build:
 build-exe:
 	go build -o bin/app.exe ./cmd/api/
 
+run-binary:
+	./bin/app
+
+# Build container for dev
+dev:
+	docker compose -f $(DEV_COMPOSE) down
+	docker compose -f $(DEV_COMPOSE) --env-file $(ENV_FILE) up --build
+
+# Build container for noapp
+noapp:
+	docker compose -f $(NOAPP_COMPOSE) down
+	docker compose -f $(NOAPP_COMPOSE) --env-file $(ENV_FILE) up --build -d
+
+# Stop all containers in noapp
+stop-noapp:
+	docker compose -f $(NOAPP_COMPOSE) down
+
+# Build and run the application in production mode using Docker Compose
 prod:
-	docker compose -f $(DOCKER_COMPOSE_FILE) down
-	docker compose -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) up --build -d
+	docker compose -f $(PROD_COMPOSE) down
+	docker compose -f $(PROD_COMPOSE) --env-file $(ENV_FILE) up --build -d
 
+# Stop all containers in production mode
 stop-prod:
-	docker compose -f $(DOCKER_COMPOSE_FILE) down
+	docker compose -f $(PROD_COMPOSE) down
+
+# View logs of the application in production mode
+logs-prod:
+	docker compose -f $(PROD_COMPOSE) logs -f --tail=100
 
 
-.PHONY: importdb exportdb migrate-create migrate-up migrate-down migrate-down-n migrate-force migration-drop migrate-goto sqlc-g build build-exe server
+.PHONY: importdb exportdb migrate-create migrate-up migrate-down migrate-down-n migrate-force migration-drop migrate-goto sqlc-g build build-exe server prod stop-prod logs-prod stop-noapp run-binary noapp dev
