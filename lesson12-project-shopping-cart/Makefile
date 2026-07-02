@@ -6,6 +6,7 @@ MIGRATION_DIRS = internal/db/migrations
 PROD_COMPOSE = docker-compose.prod.yml
 NOAPP_COMPOSE = docker-compose.noapp.yml
 DEV_COMPOSE = docker-compose.dev.yml
+NAME_SERVICE_API_DEV = 'api'
 
 ENV_FILE = .env
 
@@ -62,8 +63,8 @@ run-binary:
 
 # Build container for dev
 dev:
-	docker compose -f $(DEV_COMPOSE) down
-	docker compose -f $(DEV_COMPOSE) --env-file $(ENV_FILE) up --build
+	docker compose -f $(DEV_COMPOSE) down $(NAME_SERVICE_API_DEV)
+	docker compose -f $(DEV_COMPOSE) --env-file $(ENV_FILE) up --build $(NAME_SERVICE_API_DEV)
 
 # Build container for noapp
 noapp:

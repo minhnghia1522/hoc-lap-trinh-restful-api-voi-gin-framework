@@ -63,7 +63,7 @@ func LoggerMiddleware(httpLogger *zerolog.Logger) gin.HandlerFunc {
 			if err != nil {
 				httpLogger.Error().Err(err).Msg("Failed to read request body")
 			}
-			fmt.Printf("%+v", string(bodyBytes))
+			httpLogger.Debug().Str("request_body_raw", string(bodyBytes)).Msg("Request body read")
 			ctx.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 			if strings.HasPrefix(contentType, "application/json") {

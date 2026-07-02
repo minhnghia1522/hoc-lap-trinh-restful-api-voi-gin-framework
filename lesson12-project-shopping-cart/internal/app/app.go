@@ -2,11 +2,9 @@ package app
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 	"user-management-api/internal/config"
@@ -15,10 +13,10 @@ import (
 	"user-management-api/internal/validation"
 	"user-management-api/pkg/auth"
 	"user-management-api/pkg/cache"
+	"user-management-api/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
 )
 
 type Module interface {
@@ -37,10 +35,9 @@ type Application struct {
 }
 
 func NewApplication() *Application {
-	loadEnv()
 	appConfig := config.NewConfig()
 	if err := db.InitDB(appConfig); err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
+		logger.Log.Fatal().Err(err).Msg("Failed to initialize database")
 	}
 
 	redisClient := config.NewRedisClient()
@@ -82,22 +79,22 @@ func (a *Application) Run() error {
 	signal.Notify(quite, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
 	go func() {
-		log.Printf("🍺 Server is running at %s \n", server.Addr)
+		logger.Log.Info().Str("addr", server.Addr).Msg("🍺 Server is running")
 		if err := server.ListenAndServe(); err != http.ErrServerClosed {
-			log.Fatalf("❌ Failed to start server. %v", err)
+			logger.Log.Fatal().Err(err).Msg("❌ Failed to start server")
 		}
 	}()
 
 	<-quite
-	log.Println("❗Shutdown signal received ...")
+	logger.Log.Info().Msg("❗Shutdown signal received")
 
 	context, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	if err := server.Shutdown(context); err != nil {
-		log.Fatalf("⛔ Server forced to shutdown ⛔. %v", err)
+		logger.Log.Fatal().Err(err).Msg("⛔ Server forced to shutdown ⛔")
 	}
-	log.Println("🍺 Server exited gracefully.🍺")
+	logger.Log.Info().Msg("🍺 Server exited gracefully.🍺")
 	return nil
 }
 
@@ -107,18 +104,4 @@ func getModuleRoutes(modules []Module) []routes.Route {
 		routeList[i] = module.Routes()
 	}
 	return routeList
-}
-
-func loadEnv() {
-	cmd, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("Failed to get working directory: %v", err)
-	}
-	envPath := filepath.Join(cmd, ".env")
-	if err := godotenv.Load(envPath); err != nil {
-		log.Printf("No .env file Found at %s ", envPath)
-	} else {
-		log.Printf("Load environment from %s successful", envPath)
-	}
-
 }

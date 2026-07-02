@@ -33,15 +33,19 @@ func getClientIP(ctx *gin.Context) string {
 
 }
 
-func getRateLimiter(ip string) *rate.Limiter {
+func getRateLimiter(ip string, rateLogger *zerolog.Logger) *rate.Limiter {
 	mu.Lock()
 	defer mu.Unlock()
 	client, exists := clients[ip]
-	var err error
 	limit, err := strconv.ParseFloat(utils.GetEnv("RATE_LIMITER_REQUEST_SEC", "5"), 64)
+	if err != nil {
+		rateLogger.Error().Err(err).Str("env", "RATE_LIMITER_REQUEST_SEC").Msg("Invalid rate limiter config")
+		panic("Invalid RATE_LIMITER_REQUEST: " + err.Error())
+	}
 	brust, err := strconv.Atoi(utils.GetEnv("RATE_LIMITER_REQUEST_BRUST", "10"))
 	if err != nil {
-		panic("Invalid RATE_LIMITER_REQUEST: " + err.Error())
+		rateLogger.Error().Err(err).Str("env", "RATE_LIMITER_REQUEST_BRUST").Msg("Invalid rate limiter config")
+		panic("Invalid RATE_LIMITER_REQUEST_BRUST: " + err.Error())
 	}
 
 	if !exists {
@@ -78,7 +82,7 @@ func RateLimiterMiddleware(logger *zerolog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ip := getClientIP(ctx)
 
-		limiter := getRateLimiter(ip)
+		limiter := getRateLimiter(ip, logger)
 
 		if !limiter.Allow() {
 			if shouldLogRateLimit(ip) {

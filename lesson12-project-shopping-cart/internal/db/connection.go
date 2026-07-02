@@ -3,11 +3,11 @@ package db
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 	"user-management-api/internal/config"
 	"user-management-api/internal/db/sqlc"
 	"user-management-api/internal/utils"
+	"user-management-api/pkg/logger"
 	"user-management-api/pkg/pgx"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -61,6 +61,6 @@ func InitDB(appConfig *config.Config) error {
 	Pool = DBPool
 	DB = sqlc.New(Pool)
 
-	log.Println("Database connected")
+	logger.Log.Info().Msg("Database connected")
 	return nil
 }

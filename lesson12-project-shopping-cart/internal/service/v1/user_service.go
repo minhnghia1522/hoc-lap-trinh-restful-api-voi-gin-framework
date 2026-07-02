@@ -4,13 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 	"user-management-api/internal/db/sqlc"
 	"user-management-api/internal/repository"
 	"user-management-api/internal/utils"
 	"user-management-api/pkg/cache"
+	"user-management-api/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -48,7 +48,7 @@ func (us *userService) CreateUser(ctx *gin.Context, userParam sqlc.CreateUserPar
 		return sqlc.User{}, utils.WrapError(err, "Failed to insert user", utils.ErrCodeInternal)
 	}
 	if err := us.cache.Clear("users:*"); err != nil {
-		log.Printf("Error clearing cache: %v", err)
+		logger.Log.Warn().Err(err).Str("cache_pattern", "users:*").Msg("Error clearing cache")
 	}
 	return userCreated, nil
 }
@@ -65,7 +65,7 @@ func (us *userService) DeleteUser(ctx *gin.Context, uuid uuid.UUID) error {
 		return utils.WrapError(err, "failed to restore user", utils.ErrCodeInternal)
 	}
 	if err := us.cache.Clear("users:*"); err != nil {
-		log.Printf("Error clearing cache: %v", err)
+		logger.Log.Warn().Err(err).Str("cache_pattern", "users:*").Msg("Error clearing cache")
 	}
 	return nil
 }
@@ -111,7 +111,7 @@ func (us *userService) UpdateUser(ctx *gin.Context, uuid uuid.UUID, updatedAt ti
 		return sqlc.User{}, err
 	}
 	if err := us.cache.Clear("users:*"); err != nil {
-		log.Printf("Error clearing cache: %v", err)
+		logger.Log.Warn().Err(err).Str("cache_pattern", "users:*").Msg("Error clearing cache")
 	}
 	return updatedUser, nil
 
@@ -129,7 +129,7 @@ func (us *userService) RestoreUser(ctx *gin.Context, uuid uuid.UUID) (sqlc.User,
 		return sqlc.User{}, utils.WrapError(err, "failed to restore user", utils.ErrCodeInternal)
 	}
 	if err := us.cache.Clear("users:*"); err != nil {
-		log.Printf("Error clearing cache: %v", err)
+		logger.Log.Warn().Err(err).Str("cache_pattern", "users:*").Msg("Error clearing cache")
 	}
 	return user, nil
 }
@@ -146,7 +146,7 @@ func (us *userService) SoftDeleteUser(ctx *gin.Context, uuid uuid.UUID) (sqlc.Us
 		return sqlc.User{}, utils.WrapError(err, "failed to soft delete user", utils.ErrCodeInternal)
 	}
 	if err := us.cache.Clear("users:*"); err != nil {
-		log.Printf("Error clearing cache: %v", err)
+		logger.Log.Warn().Err(err).Str("cache_pattern", "users:*").Msg("Error clearing cache")
 	}
 	return user, nil
 }
@@ -180,7 +180,7 @@ func (us *userService) GetAllUsers(ctx *gin.Context, search, orderBy, sort strin
 	}
 	// Get data from cache if available
 	if err := us.cache.Get(cacheKey, &cachedData); err == nil {
-		log.Printf("Cache hit for key %s \n", cacheKey)
+		logger.Log.Info().Str("cache_key", cacheKey).Msg("Cache hit")
 		return cachedData.Users, cachedData.Total, nil
 	}
 
@@ -207,7 +207,7 @@ func (us *userService) GetAllUsers(ctx *gin.Context, search, orderBy, sort strin
 		Total: int32(total),
 	}
 	if err := us.cache.Set(cacheKey, cacheData, 5*time.Minute); err != nil {
-		log.Printf("Failed to set cache for key %s: %v \n", cacheKey, err)
+		logger.Log.Warn().Err(err).Str("cache_key", cacheKey).Msg("Failed to set cache")
 	}
 	return users, int32(total), nil
 }

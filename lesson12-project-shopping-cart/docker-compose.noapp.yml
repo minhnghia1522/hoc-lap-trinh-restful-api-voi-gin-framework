@@ -3,7 +3,7 @@ version: "3.8"
 services:
   db:
     image: postgres:17.5-alpine3.22
-    container_name: postgres-shopping-cart
+    container_name: db
     restart: unless-stopped
     environment:
       POSTGRES_DB: master-golang
@@ -22,7 +22,7 @@ services:
       retries: 3
   redis:
     image: redis:8.0-alpine
-    container_name: redis-shopping-cart
+    container_name: redis-go
     restart: unless-stopped
     environment:
       REDIS_DB: ${REDIS_DB}
