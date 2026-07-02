@@ -36,7 +36,7 @@ type Application struct {
 	modules []Module
 }
 
-func NewApplication(cfg *config.Config) *Application {
+func NewApplication() *Application {
 	loadEnv()
 	appConfig := config.NewConfig()
 	if err := db.InitDB(appConfig); err != nil {
@@ -63,7 +63,7 @@ func NewApplication(cfg *config.Config) *Application {
 	routes.RegisterRoutes(r, tokenService, redisService, getModuleRoutes(modules)...)
 
 	return &Application{
-		config:  cfg,
+		config:  appConfig,
 		router:  r,
 		modules: modules,
 	}

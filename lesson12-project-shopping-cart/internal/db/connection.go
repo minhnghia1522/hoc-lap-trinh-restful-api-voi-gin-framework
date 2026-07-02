@@ -54,7 +54,7 @@ func InitDB(appConfig *config.Config) error {
 	}
 
 	if err := DBPool.Ping(ctx); err != nil {
-		Pool.Close()
+		DBPool.Close()
 		return fmt.Errorf("DB ping error %v", err)
 	}
 

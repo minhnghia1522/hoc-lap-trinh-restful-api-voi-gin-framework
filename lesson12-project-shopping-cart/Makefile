@@ -3,6 +3,9 @@ export
 
 CONNECTION_STR = postgresql://$(DB_USER):$(DB_PASS)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSLMODE)
 MIGRATION_DIRS = internal/db/migrations
+DOCKER_COMPOSE_FILE = docker-compose.yml
+
+ENV_FILE = .env
 
 # Import Database
 importdb:
@@ -51,6 +54,13 @@ build:
 
 build-exe:
 	go build -o bin/app.exe ./cmd/api/
+
+prod:
+	docker compose -f $(DOCKER_COMPOSE_FILE) down
+	docker compose -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) up --build -d
+
+stop-prod:
+	docker compose -f $(DOCKER_COMPOSE_FILE) down
 
 
 .PHONY: importdb exportdb migrate-create migrate-up migrate-down migrate-down-n migrate-force migration-drop migrate-goto sqlc-g build build-exe server

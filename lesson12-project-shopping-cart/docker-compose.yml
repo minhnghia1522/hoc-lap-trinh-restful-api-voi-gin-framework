@@ -13,6 +13,13 @@ services:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-networks
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
   redis:
     image: redis:8.0-alpine
     container_name: redis-shopping-cart
@@ -34,6 +41,23 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-api-shopping-cart
+    restart: unless-stopped
+    ports:
+      - "8090:8080"
+    volumes:
+      - ./internal/logs:/app/internal/logs
+    networks:
+      - app-networks
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   pgdata:
