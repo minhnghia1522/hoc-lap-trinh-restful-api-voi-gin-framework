@@ -41,6 +41,21 @@ services:
   #     interval: 30s
   #     timeout: 10s
   #     retries: 3
+
+  # rabbitmq:
+  #   image: rabbitmq:4.3.2-management-alpine
+  #   container_name: rabbitmq
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5672:5672"
+  #     - "15672:15672"
+  #   networks:
+  #     - app-networks
+  #   healthcheck:
+  #     test: ["CMD", "rabbitmqctl", "status"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
   api:
     build:
       context: .
@@ -57,6 +72,8 @@ services:
     #   db:
     #     condition: service_healthy
     #   redis:
+    #     condition: service_healthy
+    #   rabbitmq:
     #     condition: service_healthy
 
 # volumes:
