@@ -32,9 +32,9 @@ type MailConfig struct {
 }
 
 type MailService struct {
-	config  *MailConfig
-	provder EmailProviderService
-	logger  *zerolog.Logger
+	config   *MailConfig
+	provider EmailProviderService
+	logger   *zerolog.Logger
 }
 
 func NewMailService(cfg *config.Config, logger *zerolog.Logger, providerFactory ProviderFactory) (EmailProviderService, error) {
@@ -52,9 +52,9 @@ func NewMailService(cfg *config.Config, logger *zerolog.Logger, providerFactory 
 	}
 
 	return &MailService{
-		config:  config,
-		provder: provider,
-		logger:  logger,
+		config:   config,
+		provider: provider,
+		logger:   logger,
 	}, nil
 }
 
@@ -65,7 +65,7 @@ func (ms *MailService) SendMail(ctx context.Context, email *Email) error {
 	var lastErr error
 	for attempt := 1; attempt <= ms.config.MaxRetries; attempt++ {
 		startAttempt := time.Now()
-		err := ms.provder.SendMail(ctx, email)
+		err := ms.provider.SendMail(ctx, email)
 		if err == nil {
 			ms.logger.Info().Str("trace_id", traceID).
 				Dur("duration", time.Since(startAttempt)).

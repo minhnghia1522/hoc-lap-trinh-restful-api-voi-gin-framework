@@ -26,7 +26,11 @@ func main() {
 
 	loadEnv(filepath.Join(rootDir, ".env"))
 	// Initialize application
-	application := app.NewApplication()
+	application, err := app.NewApplication()
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Application setup failed")
+		panic(err)
+	}
 
 	// Start server
 	if err := application.Run(); err != nil {

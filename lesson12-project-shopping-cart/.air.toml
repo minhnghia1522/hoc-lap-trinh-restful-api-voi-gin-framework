@@ -15,13 +15,17 @@ cmd = "go build -o ./tmp/main ./cmd/api"
 bin = "./tmp/main"
 
 # Watch these filename extensions. Use ["*"] to watch all file extensions.
-include_ext = ["go", "yaml", "ynl", "env"]
+include_ext = ["go", "yaml", "yml", "env"]
 
 # Ignore these filename extensions or directories.
 exclude_dir = ["assets", "tmp", "vendor", "frontend/node_modules"]
 
 # It's not necessary to trigger build each time file changes if it's too frequent.
 delay = 1000 # ms
+
+# Docker Desktop on Windows bind mounts can miss fsnotify events.
+# poll = true
+# poll_interval = 500 # ms
 
 # Send Interrupt signal before killing process (ignored on Windows; uses TASKKILL)
 send_interrupt = false

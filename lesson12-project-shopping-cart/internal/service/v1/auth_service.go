@@ -226,25 +226,25 @@ func (as *authService) RequestForgotPassword(ctx *gin.Context, email string) err
 		return utils.NewError("Failed to store rate limit reset password", utils.ErrCodeInternal)
 	}
 
-	// resetLink := fmt.Sprintf("http://abc.com/view-to-reset-password?token=%s", token)
+	resetLink := fmt.Sprintf("http://abc.com/view-to-reset-password?token=%s", token)
 
-	// mailContent := &mail.Email{
-	// 	To: []mail.Address{
-	// 		{Email: email},
-	// 	},
-	// 	Subject: "Password Reset Request",
-	// 	Text: fmt.Sprintf("Hi %s, \n\n You requested to reset your password. Please click the link below to reset it:\n%s\n\n The link will expire in 1 hour. \n\n Best regard, \nCode With Tuan Team",
-	// 		user.UserEmail,
-	// 		resetLink),
-	// }
+	mailContent := &mail.Email{
+		To: []mail.Address{
+			{Email: email},
+		},
+		Subject: "Password Reset Request",
+		Text: fmt.Sprintf("Hi %s, \n\n You requested to reset your password. Please click the link below to reset it:\n%s\n\n The link will expire in 1 hour. \n\n Best regard, \nCode With Tuan Team",
+			user.UserEmail,
+			resetLink),
+	}
 
 	// if err := as.rabbitmq.Publish(ctx, "auth_email_queue", mailContent); err != nil {
 	// 	return utils.NewError("Failed to send password reset email", utils.ErrCodeInternal)
 	// }
 
-	// if err := as.mailService.SendMail(context, mailContent); err != nil {
-	// 	return utils.NewError("Failed to send passwod reset email", utils.ErrCodeInternal)
-	// }
+	if err := as.mailService.SendMail(context, mailContent); err != nil {
+		return utils.NewError("Failed to send passwod reset email", utils.ErrCodeInternal)
+	}
 
 	return nil
 }

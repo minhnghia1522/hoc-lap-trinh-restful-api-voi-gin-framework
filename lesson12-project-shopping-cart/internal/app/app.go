@@ -10,10 +10,12 @@ import (
 	"user-management-api/internal/config"
 	"user-management-api/internal/db"
 	"user-management-api/internal/routes"
+	"user-management-api/internal/utils"
 	"user-management-api/internal/validation"
 	"user-management-api/pkg/auth"
 	"user-management-api/pkg/cache"
 	"user-management-api/pkg/logger"
+	"user-management-api/pkg/mail"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -34,7 +36,7 @@ type Application struct {
 	modules []Module
 }
 
-func NewApplication() *Application {
+func NewApplication() (*Application, error) {
 	appConfig := config.NewConfig()
 	if err := db.InitDB(appConfig); err != nil {
 		logger.Log.Fatal().Err(err).Msg("Failed to initialize database")
@@ -51,10 +53,22 @@ func NewApplication() *Application {
 	r := gin.Default()
 
 	tokenService := auth.NewJWTService(redisService)
+	mailLogger := utils.NewLoggerWithPath("mail.log", "info")
+	factory, err := mail.NewProviderFactory(mail.ProviderMailtrap)
+	if err != nil {
+		mailLogger.Error().Err(err).Msg("Failed to create mail provider factory")
+		return nil, err
+	}
+
+	mailService, err := mail.NewMailService(appConfig, mailLogger, factory)
+	if err != nil {
+		mailLogger.Error().Err(err).Msg("Failed to initialize mail service")
+		return nil, err
+	}
 
 	modules := []Module{
 		NewUserModule(ctx),
-		NewAuthModule(ctx, tokenService, redisService, nil, nil),
+		NewAuthModule(ctx, tokenService, redisService, mailService, nil),
 	}
 
 	routes.RegisterRoutes(r, tokenService, redisService, getModuleRoutes(modules)...)
@@ -63,7 +77,7 @@ func NewApplication() *Application {
 		config:  appConfig,
 		router:  r,
 		modules: modules,
-	}
+	}, nil
 }
 
 func (a *Application) Run() error {

@@ -30,7 +30,7 @@ type MailtrapProvider struct {
 func NewMailtrapProvider(config *MailConfig) (EmailProviderService, error) {
 	mailtrapCfg, ok := config.ProviderConfig["mailtrap"].(map[string]any)
 	if !ok {
-		return nil, utils.NewError("Invalid or missing MailTrap configuaration", utils.ErrCodeInternal)
+		return nil, utils.NewError("Invalid or missing MailTrap configuration", utils.ErrCodeInternal)
 	}
 
 	return &MailtrapProvider{
