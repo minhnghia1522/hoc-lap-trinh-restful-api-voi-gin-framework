@@ -36,10 +36,11 @@ type Application struct {
 	modules []Module
 }
 
-func NewApplication() (*Application, error) {
-	appConfig := config.NewConfig()
+func NewApplication(appConfig *config.Config) (*Application, error) {
+
 	if err := db.InitDB(appConfig); err != nil {
 		logger.Log.Fatal().Err(err).Msg("Failed to initialize database")
+		return nil, err
 	}
 
 	redisClient := config.NewRedisClient()

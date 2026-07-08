@@ -2,13 +2,16 @@ package main
 
 import (
 	"path/filepath"
-	"user-management-api/internal/app"
 	"user-management-api/internal/config"
 	"user-management-api/internal/utils"
 	"user-management-api/pkg/logger"
 
 	"github.com/joho/godotenv"
 )
+
+func NewWorker(cfg *config.Config) {
+
+}
 
 func main() {
 	rootDir := utils.MustGetWorkingDir()
@@ -30,16 +33,5 @@ func main() {
 	}
 	// Initialize application
 	appConfig := config.NewConfig()
-
-	application, err := app.NewApplication(appConfig)
-	if err != nil {
-		logger.Log.Fatal().Err(err).Msg("Failed to initialize application")
-		panic(err)
-	}
-
-	// Start server
-	if err := application.Run(); err != nil {
-		logger.Log.Fatal().Err(err).Msg("Application run failed")
-		panic(err)
-	}
+	NewWorker(appConfig)
 }

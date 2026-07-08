@@ -38,7 +38,7 @@ func NewLoggerWithPath(filename string, level string) *zerolog.Logger {
 	if err != nil {
 		log.Fatalf("Failed to get working directory: %v", err)
 	}
-	path := filepath.Join(cmd,"internal/logs", filename)
+	path := filepath.Join(cmd, "internal/logs", filename)
 	config := logger.LoggerConfig{
 		Level:       level,
 		FileName:    path,
@@ -58,4 +58,12 @@ func GenerateRandomString(length int) (string, error) {
 	}
 
 	return base64.URLEncoding.EncodeToString(bytes), nil
+}
+
+func MustGetWorkingDir() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal("❌ Unable to get working dir:", err)
+	}
+	return dir
 }

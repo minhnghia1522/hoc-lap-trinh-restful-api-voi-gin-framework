@@ -59,11 +59,21 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    container_name: go-api-shopping-cart
+      dockerfile: Dockerfile.api.dev
+    container_name: golang-api
     restart: unless-stopped
     ports:
       - "8090:8080"
+    volumes:
+      - ./:/app
+    networks:
+      - app-networks
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker.dev
+    container_name: golang-worker
+    restart: unless-stopped
     volumes:
       - ./:/app
     networks:
