@@ -16,6 +16,7 @@ import (
 	"user-management-api/pkg/cache"
 	"user-management-api/pkg/logger"
 	"user-management-api/pkg/mail"
+	"user-management-api/pkg/rabbitmq"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -67,9 +68,18 @@ func NewApplication(appConfig *config.Config) (*Application, error) {
 		return nil, err
 	}
 
+	rabbitmqLogger := utils.NewLoggerWithPath("worker.log", "info")
+	rabbitmqService, err := rabbitmq.NewRabbitMQService(
+		utils.GetEnv("RABBITMQ_URL", "amqp://guest:guest@rabbitmq:5672/"), rabbitmqLogger,
+	)
+	if err != nil {
+		rabbitmqLogger.Error().Err(err).Msg("Failed to initialize rabbitMQ")
+		return nil, err
+	}
+
 	modules := []Module{
 		NewUserModule(ctx),
-		NewAuthModule(ctx, tokenService, redisService, mailService, nil),
+		NewAuthModule(ctx, tokenService, redisService, mailService, rabbitmqService),
 	}
 
 	routes.RegisterRoutes(r, tokenService, redisService, getModuleRoutes(modules)...)

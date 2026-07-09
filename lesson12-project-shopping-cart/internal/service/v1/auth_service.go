@@ -238,13 +238,13 @@ func (as *authService) RequestForgotPassword(ctx *gin.Context, email string) err
 			resetLink),
 	}
 
-	// if err := as.rabbitmq.Publish(ctx, "auth_email_queue", mailContent); err != nil {
+	if err := as.rabbitmq.Publish(ctx, "auth_email_queue", mailContent); err != nil {
+		return utils.NewError("Failed to send password reset email", utils.ErrCodeInternal)
+	}
+
+	// if err := as.mailService.SendMail(context, mailContent); err != nil {
 	// 	return utils.NewError("Failed to send password reset email", utils.ErrCodeInternal)
 	// }
-
-	if err := as.mailService.SendMail(context, mailContent); err != nil {
-		return utils.NewError("Failed to send passwod reset email", utils.ErrCodeInternal)
-	}
 
 	return nil
 }
