@@ -16,8 +16,7 @@ build/
 *.test
 *.out
 
-# Logs
-*.log
+
 
 # OS / editor files
 .DS_Store
